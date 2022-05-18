@@ -1,0 +1,102 @@
+---
+title: "Proyecto"
+output:
+  pdf_document: default
+  html_document: default
+date: '2022-05-10'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Cargamos los datos:
+
+```{r}
+info <- read.csv('procesados.csv')
+info <- info[info['CONTAMINANTE'] == 'CO',]
+info <- info[-nrow(info),] #eliminamos 2020
+
+p_alcaldia <- read.csv("RAMA_CDMX_86-22_chico.csv")
+```
+
+Graficamos el promedio de CO2 para cada año:
+
+```{r}
+f <- function(x) exp(2110.2 - 277.3 * x)
+x <- as.matrix(info['AÑO']) 
+y <- as.matrix(info['MEAN_CONT'])
+plot(x ,y, xlab = 'Año' , ylab = 'Promedio de CO2')
+curve(f(x) , add = TRUE)
+```
+
+```{R}
+ggplot(data = info, mapping = aes(x = AÑO, y = MEAN_CONT)) + 
+  geom_point() + 
+  labs(
+      x="Año", y="Media de CO",
+      title="Media de CO por año"
+    )
+```
+
+Por alcaldía
+
+```{R}
+ggplot(data = p_alcaldia, mapping = aes(AÑO, VALUE, color=ALCALDIA)) + 
+  geom_point()
+```
+
+
+Podemos ver que los datos tienen una tendencia monótona decreciente, se le podría ajustar una función logaritmica, o eliminar los primero tres datos y ajustar una función lineal. Comenzaremos ajustando una función logarítmica:
+
+Elimienando las primeras 3 variables y ajustando una función lineal, la gráfica se ve así:
+
+```{r}
+#FALTA POR HACER 
+```
+
+Ahora veremos como se se ven los niveles de CO_2 con respecto a a est_V:
+
+```{r}
+x <- as.matrix(info['EST_V']) 
+y <- as.matrix(info['MEAN_CONT'])
+plot(x ,y, xlab = 'EST_V' , ylab = 'Promedio de CO2')
+curve(f(x) , add = TRUE)
+```
+
+Si se tratara de una regresión lineal simple, deberíamos de hacer una prueba de hipótesis de "lack of fit". Sin embargo, al tener un modelo de regresión lineal simple, no es el caso. (Preguntar que es EST_V). Ahora veremos que pasa con la población.
+
+```{r}
+x <- as.matrix(info['POBLACION']) / 10^6 #lo transformamos a millones de habitantes 
+y <- as.matrix(info['MEAN_CONT'])
+plot(x ,y, xlab = 'Población' , ylab = 'Promedio de CO2')
+curve(f(x) , add = TRUE)
+```
+
+También tiene una forma exponencial o de la forma 1 / x. Es decir, la relación de los niveles de CO_2 con respecto a la población es monótona decreciente. Esto se debe a que al aumentar la población en la Ciudad de México entonces aumenta la cantidad de transposte público. Ahora veremos que pasa con la cantidad de automóviles:
+
+```{r}
+x <- as.matrix(info['AUTOMOVILES']) / 10^6 #lo transformamos a millones de automoviles
+y <- as.matrix(info['MEAN_CONT'])
+plot(x ,y, xlab = 'Población' , ylab = 'Promedio de CO2')
+curve(f(x) , add = TRUE)
+```
+
+Los datos presentan una tendencia monótona decreciente con forma exponencial negativa. Esto puede deberse a las direrentes medidas tomadas a lo largo del tiempo.
+
+Crearemos un modelo de regresión lineal múltiple y posteriormente, con transformaciones, veremos si podemos darle un mejor ajuste al modelo. El primer model es CO = beta_0 + beta_1POB + beta_2AUT + beta_3EST__V 
+
+```{r}
+m1 <- lm(log(MEAN_CONT) ~ log(POBLACION) + log(EST_V) + log(AUTOMOVILES), data = info)
+summary(m1)
+```
+
+Podemos ver que la variable EST_V no es parcialmente significativa. Asimismo, la $R^2$ es bastante alta dado el problema. AHora obtendremos un modelo con Forward Stepwise.
+
+
+
+
+
+

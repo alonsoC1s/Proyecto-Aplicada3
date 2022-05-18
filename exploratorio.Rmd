@@ -1,0 +1,131 @@
+---
+title: "Proyecto Est. Aplicada III"
+output:
+  pdf_document: default
+  html_document: default
+date: '2022-05-10'
+---
+
+### Análisis exploratorio
+
+```{r, echo=FALSE}
+library("ggplot2")
+library("corrplot")
+
+info <- read.csv('procesados.csv')
+info <- info[info['CONTAMINANTE'] == 'CO',]
+info <- info[-nrow(info),] #eliminamos 2020
+```
+
+```{R}
+pairs(info[, c(3, 5, 6, 7)])
+```
+
+```{R}
+cor(info[, c(3, 5, 6, 7)]) |> corrplot(method="ellipse", tl.cex = 0.7)
+```
+
+```{R}
+p_medias <- p_alcaldia |>
+    group_by(ALCALDIA, AÑO) |>
+    summarize(MEAN_CONT = mean(VALUE))
+```
+
+Autos & promedio de CO a través del tiempo.
+```{R}
+ggplot(data=info, mapping = aes(AÑO, MEAN_CONT)) +
+    geom_point() +
+    geom_smooth() + 
+    labs(
+        x = "Año", y = "Media anual de CO"
+    )
+```
+
+
+Autos & promedio de CO a través del tiempo.
+```{R}
+ggplot(data=info, mapping = aes(AÑO, AUTOMOVILES)) +
+    geom_point() +
+    geom_smooth() + 
+    labs(
+        x = "Año", y = "Número de automóviles registrados"
+    )
+```
+
+
+Autos & promedio de CO a través del tiempo.
+```{R}
+ggplot(data=info, mapping = aes(AÑO, POBLACION / 1e6)) +
+    geom_point() +
+    geom_smooth() + 
+    labs(
+        x = "Año", y = "Población en millones"
+    )
+```
+
+Número de estaciones de de transporte público eléctrico a través del tiempo
+```{R}
+ggplot(data=info, mapping = aes(AÑO,  EST_V)) +
+    geom_point() +
+    geom_smooth() + 
+    labs(
+        x = "Año", y = "Estaciones de transporte público eléctrico"
+    )
+```
+
+#### Dado lo observado quitamos los datos antes del 1993
+
+```{R}
+info <- info |>
+    dplyr::filter(AÑO > 1994)
+```
+
+Autos & promedio de CO a través del tiempo con el arreglo
+
+```{R}
+ggplot(data=info, mapping = aes(AÑO, MEAN_CONT)) +
+    geom_point() +
+    geom_smooth() + 
+    labs(
+        x = "Año", y = "Media anual de CO"
+    )
+```
+
+
+
+## Pruebas de hipótesis
+
+## Especificación del modelo de regresión
+
+$$
+\ln(\text{CO}_{t}) = \beta_0 + \beta_1 \ln(\text{POBLACION}_{t}) + \beta_2 \ln(\text{EST\_V}_{t})  + \beta_3 \ln(\text{AUTOMOVILES}_{t})
+$$
+
+En R lo espcificamos así:
+
+```{R}
+spec <- log(MEAN_CONT) ~ log(POBLACION) + log(EST_V) + log(AUTOMOVILES)
+```
+
+
+# Estimación del modelo 
+
+## Estimación OLS
+```{R}
+m_ols <- lm(spec, data=info)
+summary(m_ols)
+```
+
+## Estimación GLS
+Uso el paquete `nlme`.
+
+```{R}
+m_gls <- gls(spec, data=info)
+summary(m_gls)
+```
+
+
+La estimación es idéntica, pero se ve que si hay correlaciones entre variables por la matriz de correlaciones.
+
+- Está bien hecho?
+- Son malas noticias?

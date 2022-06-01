@@ -295,7 +295,7 @@ begin
 		end
 	end
 
-	vcat(pob, pob_70_80)
+	pob = vcat(pob, pob_70_80) |> sort
 end
 
 # ╔═╡ b58a28ab-3eaa-4a84-9485-a0f930082c7c

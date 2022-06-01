@@ -8,6 +8,9 @@ date: '2022-05-10'
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(corrplot)
+library(dplyr)
 ```
 
 ## R Markdown
@@ -18,3 +21,54 @@ Cargamos los datos:
 info <- read.csv('data/datosfinales.csv')
 ```
 
+
+## Análisis exploratorio
+
+```{R}
+info |> head()
+summary(info)
+```
+
+* Hay 16 alcaldías. Cada alcaldía contiene datos de población y conectividad con el transporte público desde el año 1969 hasta el 2021.
+
+```{R}
+unique(info$ALCALDIA)
+unique(info$AÑO)
+```
+
+```{R}
+boxplot(info$MEAN_DIST)
+```
+
+* Podemos ver que las alcaldías de Cuauhtémoc, Benito Juárez y Venustiano Carranza tienen las menores varianzas en distancia media y además las más pequeñas. Por otro lado, Tláhuac y Milpa Alta son los de mayor distancia y desviación.
+```{R}
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
+  geom_boxplot() + 
+  coord_flip()
+```
+
+```{R}
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
+  geom_boxplot() + 
+  coord_flip()
+```
+
+```{R}
+info |>
+  dplyr::select_if(is.numeric) |>
+  dplyr::filter(!is.na(EST_TOTAL)) |>
+  dplyr::filter(!is.na(MEAN_DIST)) |>
+  #dplyr::select(-AÑO) |>
+  cor() |> corrplot(method="ellipse")
+```
+
+
+## PCA
+
+## Correlación canónica
+
+## Analisis Factorial
+
+## Regresión lineal
+
+## Interpretación, conclusiones, etc...

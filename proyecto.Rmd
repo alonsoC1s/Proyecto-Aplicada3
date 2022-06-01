@@ -21,6 +21,9 @@ Cargamos los datos:
 info <- read.csv('data/datosfinales.csv')
 ```
 
+## Planteamiento del problema
+
+La Ciudad de México es una de las 10 ciudades más grandes del mundo por población.
 
 ## Análisis exploratorio
 
@@ -31,14 +34,34 @@ summary(info)
 
 * Hay 16 alcaldías. Cada alcaldía contiene datos de población y conectividad con el transporte público desde el año 1969 hasta el 2021.
 
+Para el análisis que vamos a llevar a cabo recabamos información de diversas fuentes para indicadores de movilidad para las alcaldías de la CDMX y cómo han evolucionado desde principios de la década de los 70.
+
+Tenemos información para `r length(unique(info$ALCALDIA))` alcaldías, las cuales son:
 ```{R}
 unique(info$ALCALDIA)
+```
+
+Tenemos información para los siguientes años:
+```{R}
 unique(info$AÑO)
 ```
 
+Primero que nada, vemos algunas estadísticas de resumen de los datos.
+
 ```{R}
-boxplot(info$MEAN_DIST)
+summary(info)
 ```
+
+Las variables son las siguientes:
+- AÑO: El año en el cual están medidas las variables.
+- ALCALDIA: La demarcación territorial de delegación o Alcaldía al que
+  corresponden los datos.
+- POBLACIÓN: La población para cada alcaldía en el año dado.
+- MEAN_DIST: La distancia promedio de todas las zonas marcadas como
+  residenciales en la encuesta de uso de suelo a su estación de transporte público masivo más cercano medida en metros.
+- EST_TOTAL: Número total de estaciones de transporte público masivo en la
+  alcaldía al año marcado.
+- ZOC_DIST: Distancia promedio de las zonas residenciales al zócalo de la ciudad.
 
 * Podemos ver que las alcaldías de Cuauhtémoc, Benito Juárez y Venustiano Carranza tienen las menores varianzas en distancia media y además las más pequeñas. Por otro lado, Tláhuac y Milpa Alta son los de mayor distancia y desviación.
 ```{R}
@@ -58,8 +81,14 @@ info |>
   dplyr::select_if(is.numeric) |>
   dplyr::filter(!is.na(EST_TOTAL)) |>
   dplyr::filter(!is.na(MEAN_DIST)) |>
-  #dplyr::select(-AÑO) |>
+  dplyr::filter(!is.na(ZOC_DIST)) |>
+  dplyr::select(-POBLACION) |>
   cor() |> corrplot(method="ellipse")
+```
+
+```{r}
+ggplot(data=info, mapping=aes(x=AÑO, y=POBLACION, color=ALCALDIA)) +
+  geom_point()
 ```
 
 

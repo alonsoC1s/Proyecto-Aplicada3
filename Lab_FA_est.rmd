@@ -1,0 +1,311 @@
+---
+title: "Ejemplos de Análisis de Factores"
+author: "Estadística Aplicada III"
+date: "22 de abril de 2022"
+output: 
+  html_document:
+      theme: sandstone
+      highlight: tango
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(comment=NULL, fig.align = "center", fig.width = 8, fig.height = 8,
+                      warning=F, message=F)
+```
+
+En este laboratorio la intención es practicar el análisis exploratorio de factores (AF). Los siguientes paquetes son útiles en AF:
+
+```{r}
+options(width = 150)
+library(corrplot)    # hacer gráficas informativas de una matriz de correlaciones.
+library(psych)       # funciones relevantes para PCA y FA
+library(FactoMineR)  # Se puede  utilizar para mejorar las gráficas mostradas-
+```
+
+# Ejemplo 1: datos de conspiración
+
+Los datos provienen de una encuesta sobre creencias sobre creencias de conspiraciones genéricas (fuente: [Open Source Psychometrics Project](https://openpsychometrics.org/)). La encuesta original tiene 75 items, en la fuente se consideran sólo 15. Los datos tienen 2495 observaciones de 15 variables de opción múltiple que se caracterízan en 5 aspectos de las conspiraciones (basado en [Brotherton, French & Pickering (2013)](https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00279/full):
+
+- Crímenes gubernamentales (GM)
+- Encubrimientos extraterrestres (ET)
+- Conspiraciones malignas globales (MG)
+- Bienestar personal (PW)
+- Control de información (CI)
+
+Por ejemplo, el item 6 "El gobierno permite o realiza actos de terrorismo en su propio territorio, negando su involucramiento" es del tipo GM. El item 8 "Evidencia de contacto extraterrestre se mantiene oculto del público" es del tipo ET. 
+
+Las respuestas son una escala de Likert de 1 a 5, indicando desacuerdo (1)  neutral (3) y acuerdo (5). 
+
+Entonces de los datos se espera que las 15 preguntas, reflejen los 5 tipos de las que provienen. Las preguntas o items son las siguientes: 
+
+1. The government is involved in the murder of innocent citizens and/or well-known public figures, and keeps this a secret.	
+2. The power held by heads of state is second to that of small unknown groups who really control world politics.						
+3. Secret organizations communicate with extraterrestrials, but keep this fact from the public.						
+4. The spread of certain viruses and/or diseases is the result of the deliberate, concealed efforts of some organization.
+5. Groups of scientists manipulate, fabricate, or suppress evidence in order to deceive the public.
+6. The government permits or perpetrates acts of terrorism on its own soil, disguising its involvement.						
+7. A small, secret group of people is responsible for making all major decisions, such as going to war.						
+8. Evidence of alien contact is being concealed from the public.						
+9. Technology with mind-control capacities is used on people without their knowledge.						
+10. New and advanced technology which would harm current industry is being suppressed.						
+11. The government uses people as patsies to hide its involvement in criminal activity.						
+12. Certain significant events have been the result of the activity of a small group who secretly manipulate world events.
+13. Some UFO sightings and rumours are planned or staged in order to distract the public from real alien contact.						
+14. Experiments involving new drugs or technologies are routinely carried out on the public without their knowledge or consent.
+15. A lot of important information is deliberately concealed from the public out of self-interest.	
+
+Estos 5 grupos comparten a su vez un factor de mayor orden que es la creencia conspiracionista:
+
+<p align = "center">
+<img width="350" height = "350" src="figs/FA_Conspiracion.png">
+</p>
+
+
+```{r}
+gcbs <- readRDS(gzcon(url("https://github.com/jvega68/EA3/raw/master/datos/GCBS_data.rds")))
+head(gcbs)
+```
+
+Primero analizamos la estructura de correlación de las 15 variables y luego corremos primero un ejemplo con un sólo factor:
+
+```{r}
+# otras opciones para la gráfica es usar method = "number"
+corrplot(cor(gcbs), method = "ellipse", order = "hclust")
+lowerCor(gcbs)  # otra manera con psych
+```
+
+Podemos hacer algunas pruebas para la signiificancia de las correlaciones, además de visualizar los valores:
+
+```{r}
+corr.test(gcbs, adjust = "bonferroni")
+# También se pueden ver los intervalos de confianza con ajuste de Bonferroni (u otros)
+# para considerar el mismo nivel de significancia. 
+print(corr.test(gcbs, adjust = "bonferroni"), short = F)
+```
+
+También se pueden aplicar otras pruebas: 
+
+1. la prueba de esfericidad de Bartlett para probar $H_0: cor(X) = I_p \quad vs \quad H_a:cor(X)\neq I_p$  (agregada su descripción a la presentación sobre el tema de AF).
+
+2. La prueba KMO (Kaiser-Meyer-Olkin) de **adecuación de la muestra**. La prueba mide la adecuación muestral de cada variable en el modelo y de todo el modelo completo. La prueba se basa en cocientes de coeficientes de correlación y de coeficientes de correlación parcial, en espíritu similar a la prueba de esfericidad de Bartlett.  Esta prueba considera que el rango para evaluarlo se puede ver en la ayuda de la función: "In his delightfully flamboyant style, Kaiser (1975) suggested that:
+  - KMO > .9 were marvelous, 
+  - in the .80s, mertitourious, 
+  - in the .70s, middling, 
+  - in the .60s, mediocre, 
+  - in the .50s, miserable, and 
+  - less than .5, unacceptable."
+
+
+```{r}
+bartlett.test(gcbs) # prueba si la matriz de cov es la identidad
+KMO(cor(gcbs))
+```
+
+Ahora ajustamos un modelo factorial con un sólo factor:
+
+```{r}
+# opción 1: usando la función estándar
+(mod1 <- factanal(gcbs, factors = 1))
+# opción 2: usando psych
+(mod2 <- fa(gcbs, nfactors = 1, rotate = "none", fm ="ml"))
+```
+
+Podemos visualizar las cargas
+
+```{r}
+fa.diagram(mod2, digits = 2)
+```
+
+¿Cómo determinar cuántos factores se deben usar? Con los eigenvalores. Esta gráfica de codo muestra dos partes, la que corresponde a componentes principales y la que corresponde a la estimación con máxima verosimilitud. Noten que la de ML es más estricta.
+
+```{r}
+scree(gcbs)
+```
+Los datos sugieren un modelo con uno (ML) o dos factores (PC).
+
+
+
+# Ejemplo 2: datos de biblioteca
+
+Este ejemplo utiliza datos de Thompson[2004]. Los datos corresponden a una muestra aleatoria de un estudio sobre la percepsión de los usuarios en la calidad del servicio  de las librerías académicas en los Estados Unidos y Canadá. Se miden 12 variables en 100 estudiantes graduados y 100 profesores. Los datos están en el archivo *Encuesta.csv*. 
+
+Los datos corresponden a las siguientes definiciones:
+
+id: id del caso, 
+RoleType: estudiante (2) o facultad (3)
+
+- p1: Disposición de apoyar a los usuarios
+- p2: Dar a los usuarios atención individualizada
+- p3: Los empleados que tienen trato con los usuarios son cuidadosos
+- p4: Los empleados son consistentemente cortéses
+- p5: Un paraíso de quietud y soledad
+- p6: Un lugar meditativo
+- p7: Un ambiente contemplativo
+- p8: Espacio que facilita el estudio silencioso
+- p9: Colecciones impresas completas
+- p10: Títulos de revistas es completo
+- p11: La biblioteca interdisciplinaria requiere ser atendida
+- p12: Préstamo interbibliotecario/ envío oportuno de documentos
+
+```{r}
+datos <- read.csv("https://raw.githubusercontent.com/jvega68/EA3/master/datos/Encuesta.csv")
+head(datos) #muestra los primeros datos de la matriz
+id <- datos[,1]
+RoleType <- datos[,2]
+datos <- datos[ , -(1:2)] # redefinimos el conjunto para tener solo las preguntas del cuestionario
+```
+
+¿Qué hay que hacer?
+
+1. Revisar si tiene sentido aplicar análisis de factores
+2. Determinar el número óptimo de factores a calcular
+3. Estimar los factores. 
+4. Evaluar si el modelo es adecuado.
+5. Aplicar alguna rotación conveniente.
+6. Si se dispone de los datos, calcular los scores
+
+Paso 1
+```{r}
+#podemos aplicar prueba de 
+#prueba la hipótesis de que 
+bartlett.test(datos)
+#el p values es muy pequeno y se rechaza la Hipótesis nula, por lo que las correlaciones son significativas
+
+KMO(cor(datos))
+#como el overall MSA es 0.89 nos dice que sí se puede aplicar FA o si tiene sentido
+#en KMO, nos dice que es mediocre aplicar FA si es menor o igual a 0.5
+```
+
+Paso 2: definir número óptimo de factores
+Vemos los eigenvalores
+Estimando por MV (linea FA) nos diria que dos
+Estimando por PC nos diria que tres.
+Puedes correr ambos y analizarlos
+```{r}
+scree(datos)
+
+```
+Paso 3 y 4
+complejidad es la cantidad de factores en las que aparece una variable
+
+```{r}
+mod0 <- principal(datos, nfactors = 3)
+mod1 <- fa(datos, nfactors = 3, rotate = "none", fm = "ml")
+fa.diagram(mod1)
+```
+
+
+Paso 5
+```{r}
+cargas <- mod1$loadings[,1:2]
+plot(cargas, type="n", xlim = c(-1, 1), ylim  = c(-1,1))
+abline(h=0, v =0)
+text(cargas, labels= names(datos), cex=0.8)
+
+```
+```{r}
+mod_v <- fa(datos, nfactors =3, rotate = "varimax", fm = "ml")
+cargas_v <- mod_v$loadings[,1:2]
+plot(cargas, type="n", xlim = c(-1, 1), ylim  = c(-1,1))
+abline(h=0, v =0)
+text(cargas_v, labels = names(datos), cex = 0.7, col = "red")
+```
+```{r}
+mod_q <- fa(datos, nfactors =3, rotate = "quartimax", fm = "ml")
+cargas_v <- mod_v$loadings[,1:2]
+plot(cargas, type="n", xlim = c(-1, 1), ylim  = c(-1,1))
+abline(h=0, v =0)
+text(cargas_v, labels = names(datos), cex = 0.7, col = "green")
+```
+```{r}
+factor.rotate(mod1$loadings[,1:2], angle =20, plot=T, ylim = c(-1,1), xlim = c(-1,1))
+```
+```{r}
+mod_o <- fa(datos, nfactors =3, rotate = "oblimin", fm = "ml")
+cargas_o <- mod_v$loadings[,1:2]
+plot(cargas_o, type="n", xlim = c(-1, 1), ylim  = c(-1,1))
+abline(h=0, v =0)
+text(cargas_o, labels = names(datos), cex = 0.7, col = "blue")
+```
+Paso 6
+```{r}
+#por el método de regresión 
+mod2a <- fa(datos, nfactors = 3, rotate = "varimax", fm = "ml", scores = "regression")
+mod2b <- fa(datos, nfactors = 3, rotate = "varimax", fm = "ml", scores = "Bartlett")
+mod2b <- fa(datos, nfactors = 3, rotate = "none", fm = "ml", scores = "Bartlett")
+par(mfrow=c(2,2))
+biplot(mod2a, choose = c(1, 2), main = "biplot regresion")
+biplot(mod2b, choose = c(1, 2), main = "biplot WLS")
+biplot(mod2b, choose = c(1, 2), main = " WLS sin rotar")
+```
+
+
+# Ejemplo 3: Construcción de un índice
+
+Los datos corresponden a estadísticas educativas de Indonesia. El archivo contiene estadísticas de las 34 provincias de Indonesia, 25 variables con indicadores de educación, más 5 columnas de datos demográficos.
+Las variables X1 a X12 son para el año escolar 2019/2020 y las variables X13 a X25 son para el 2020.
+Vienen de 7 secciones, detallados por niveles educativos (elementary school, junior high school, senior high school, vocational high school y university).
+
+- X1 = Proportion of the Number of Classrooms and Students at the Elementary School
+- X2 =	Proportion of the Number of Classrooms and Students at the Junior High School
+- X3 =	Proportion of the Number of Classrooms and Students at the Senior High School
+- X4 = Proportion of the Number of Classrooms and Students at the Vocational High School
+- X5 = Percentage of Classrooms in Good Condition at the Elementary School
+- X6 =	Percentage of Classrooms in Good Condition at the Junior High School
+- X7 = Percentage of Classrooms in Good Condition at the Senior High School
+- X8 = Percentage of Classrooms in Good Condition at the Vocational High School
+- X9 = Percentage of Eligible Teachers at Elementary School
+- X10 =	Percentage of Eligible Teachers at Junior High School
+- X11 =	Percentage of Eligible Teachers at Senior High School
+- X12 = Percentage of Eligible Teachers at Vocational High School
+- X13 =	School Enrollment Rate (APS) at Age Group 7-12 Years
+- X14 =	School Enrollment Rate (APS) at Age Group 13-15 Years
+- X15	= School Enrollment Rate (APS) at Age Group 16-18 Years
+- X16 =	School Enrollment Rate (APS) at Age Group 19-24 Years
+- X17	= Gross Enrollment Rate (APK) by Elementary School
+- X18 =	Gross Enrollment Rate (APK) by Junior High School
+- X19	= Gross Enrollment Rate (APK) by Senior High School
+- X20 =	Gross Enrollment Rate (APK) by University
+- X21	= Net Enrollment Rate (APM) by Elementary School
+- X22	= Net Enrollment Rate (APM) by Junior High School
+- X23	= Net Enrollment Rate (APM) by Senior High School
+- X24 =	Net Enrollment Rate (APM) by University
+- X25	= Average Length of School Year for Population Aged 15 Years and Over
+
+```{r}
+# lectura de datos. Como no se puede leer un archivo de Excel 
+# directamente, primero se importa a un archivo temporal
+
+link <- "https://github.com/jvega68/EA3/raw/master/datos/BPS%20Indonesia%20Education%20Index%20-%20Processed%20Eng.xlsx"
+temp_file <- tempfile(fileext = ".xlsx")
+download.file(url = link, destfile = temp_file, mode ="wb",quiet=T)
+datos <- as.data.frame(readxl::read_xlsx(temp_file))
+rownames(datos) <- datos$Province
+datos <- datos[,-(1:5)]
+```
+
+```{r}
+scree(datos) #sugiere de 3 a 6 factores
+modelo <- fa(datos, nfactors = 6, fm = "ml", rotate = "varimax")
+print(modelo, cut = 0.3)
+fa.diagram(modelo)
+```
+Construimos los scores asociados a las regiones escolares son los siguientes:
+```{r}
+modelo$scores #son z-scores, los podemos estandarizar entre 0 y 1 
+scores_escal <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
+
+ponderadores <- modelo$Vaccounted[1,]/sum(modelo$Vaccounted[1,])
+indice <- t(apply(scores_escal, 1, function(x) x*ponderadores))
+
+indice <- data.frame(indice, rango = apply(indice, 1, sum))
+indice[order(indice$rango, decreasing = T),]
+```
+Componentes del indice
+```{r}
+barplot(t(as.matrix(indice[order(indice$rango, decreasing= F), -7])), horiz = T, las = 2, col = c("yellow", "red", "cyan","green", "violet", "pink"))
+```
+
+### Referencias
+
+1. Thompson, Bruce (2004) Exploratory and Confirmatory Factor Analysis: Understanding Concepts and Applications. American Psychological Association.

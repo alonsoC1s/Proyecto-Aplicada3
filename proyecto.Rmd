@@ -1,5 +1,10 @@
 ---
-title: "Proyecto"
+title: "Proyecto Estadística Aplicada III"
+author:
+- Alonso Martinez Cisneros
+- Juan Carlos Sigler Priego
+- Carlos Delgado
+- Esmeralda Altamirano
 output:
   bookdown::pdf_document2:
     latex_engine: xelatex
@@ -283,6 +288,10 @@ info |>
     geom_sf() +
     labs(
       title = "Alcaldías coloreadas por población al 2020"
+    ) +
+    scale_fill_gradient(
+      name = "Población",
+      trans = "log"
     )
 ```
 
@@ -430,6 +439,37 @@ info |>
   dplyr::filter(!is.na(ZOC_DIST)) |>
   #dplyr::select(-POBLACION) |>
   cor()
+```
+
+Si graficamos la distancia promedio al sistema de transporte por alcaldía la
+correlación espacial entre distancia al centro de la ciudad aproximado mediante
+la posición del zócalo podremos tener indicación visual de si nuestra hipótesis
+tiene sentido. Como medida de visualización está bien, pero hay varios problemas
+con ella como método formal. Por ejemplo, que algunas alcaldías son muy "largas"
+y sus puntos más cercanos y más lejanos el centro de la ciudad serán coloreados
+del mismo color a pesar de que no tienen la misma conectividad. El mejor ejemplo
+de este caso es Álvaro Obregón. Su zona norte y oriente están bien conectadas:
+cerca de Tacubaya y con el corredor Insurgentes Sur respectivamente. Por otro
+lado, las zonas como Los Dínamos y Las Águilas están muy lejos del resto del
+sistema.
+
+```{R, echo = FALSE}
+info |>
+  dplyr::filter(AÑO == 2020) |>
+  group_by(ALCALDIA) |>
+  dplyr::select(ALCALDIA, MEAN_DIST) |>
+  dplyr::right_join(alc, by="ALCALDIA") |>
+  ggplot(aes(fill = MEAN_DIST, geometry = geometry)) +
+    geom_sf() +
+    labs(
+      title = "Distancia al transporte más cercano",
+    ) +
+    scale_fill_gradient(
+      name = "Distancia promedio",
+      trans = "log",
+      high = "#132B43",
+      low = "#56B1F7"
+    )
 ```
 
 [Aqui grafica perrona de correlación a través del tiempo.]

@@ -507,6 +507,14 @@ Una de las herramientas que revisamos en el curso que tiene mayor poder para
 establecer relaciones entre variables es la regresión lineal. La usaremos para
 investigar qué efectos tiene sobre [índice de movilidad calculado antes o alguna
 de las métricas de conectividad] la población y la distancia promedio de la
-alcaldía a la zona centro de la ciudad. Ajustaremos el siguiente modelo lineal: 
+alcaldía a la zona centro de la ciudad. Primero se ajusta un modelo multivariado
+donde EST_TOTAL y MEAN_DIST (total de estaciones y distancia promedio a la
+estación más cercana) son las variables de respuesta. Más tarde hacemos la
+regresión sobre el índice calculado.
+
+```{R}
+lm_m <- lm(cbind(EST_TOTAL, MEAN_DIST) ~ AÑO + ALCALDIA + POBLACION + ZOC_DIST, data=info)
+summary(lm_m)
+```
 
 # Interpretación, conclusiones, etc...

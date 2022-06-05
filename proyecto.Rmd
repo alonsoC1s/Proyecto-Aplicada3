@@ -11,6 +11,7 @@ output:
     toc: true
 date: '2022-05-10'
 bibliography: refs.bib
+lang: "es"
 ---
 
 ```{r setup, include=FALSE}
@@ -21,16 +22,12 @@ library(dplyr)
 library(stargazer)
 library(sf)
 ```
-
-## R Markdown
-
-Cargamos los datos:
-
-```{r}
+```{r, echo = FALSE}
+# Cargamos los datos:
 info <- read.csv('data/datosfinales.csv')
 ```
 
-## Planteamiento del problema
+# Planteamiento del problema
 
 La Ciudad de México es una de las 10 ciudades más grandes del mundo por
 población con `r info |> dplyr::filter(AÑO == 2020) |> summarize(sum(POBLACION))
@@ -78,7 +75,7 @@ estadísticas para construir algo como un "índice de conectividad". Exploramos
 cómo se relaciona este índice con variables de interés como: centralidad medida
 en distancia a la zona del centro histórico, población, y otros factores.
 
-## Análisis exploratorio
+# Análisis exploratorio
 
 ```{R}
 info |> head()
@@ -142,22 +139,22 @@ alc <- read_sf("data/alcaldias_cdmx/alcaldías_cdmx/alcaldias_cdmx.shp")
 
 alc <- alc |>
   dplyr::mutate(nomgeo = case_when(
-    nomgeo == "MILPA ALTA"~"Milpa Alta",
-    nomgeo == "BENITO JUÁREZ"~"Benito Juárez",
-    nomgeo == "GUSTAVO A. MADERO"~"Gustavo A. Madero",
-    nomgeo == "COYOACÁN"~"Coyoacán",
-    nomgeo == "MIGUEL HIDALGO"~"Miguel Hidalgo",
-    nomgeo == "LA MAGDALENA CONTRERAS"~"Magdalena Contreras",
-    nomgeo == "TLÁHUAC"~"Tláhuac",
-    nomgeo == "AZCAPOTZALCO"~"Azcapotzalco",
-    nomgeo == "IZTACALCO"~"Iztacalco", 
-    nomgeo == "ÁLVARO OBREGÓN"~"Álvaro Obregón",
-    nomgeo == "XOCHIMILCO"~"Xochimilco",
-    nomgeo == "VENUSTIANO CARRANZA"~"Venustiano Carranza",
-    nomgeo == "TLALPAN"~"Tlalpan",
-    nomgeo == "CUAJIMALPA DE MORELOS"~"Cuajimalpa",
-    nomgeo == "CUAUHTÉMOC"~"Cuauhtémoc", 
-    nomgeo == "IZTAPALAPA"~"Iztapalapa"
+    nomgeo == "MILPA ALTA" ~ "Milpa Alta",
+    nomgeo == "BENITO JUÁREZ" ~ "Benito Juárez",
+    nomgeo == "GUSTAVO A. MADERO" ~ "Gustavo A. Madero",
+    nomgeo == "COYOACÁN" ~ "Coyoacán",
+    nomgeo == "MIGUEL HIDALGO" ~ "Miguel Hidalgo",
+    nomgeo == "LA MAGDALENA CONTRERAS" ~ "Magdalena Contreras",
+    nomgeo == "TLÁHUAC" ~ "Tláhuac",
+    nomgeo == "AZCAPOTZALCO" ~ "Azcapotzalco",
+    nomgeo == "IZTACALCO" ~ "Iztacalco", 
+    nomgeo == "ÁLVARO OBREGÓN" ~ "Álvaro Obregón",
+    nomgeo == "XOCHIMILCO" ~ "Xochimilco",
+    nomgeo == "VENUSTIANO CARRANZA" ~ "Venustiano Carranza",
+    nomgeo == "TLALPAN" ~ "Tlalpan",
+    nomgeo == "CUAJIMALPA DE MORELOS" ~ "Cuajimalpa",
+    nomgeo == "CUAUHTÉMOC" ~ "Cuauhtémoc", 
+    nomgeo == "IZTAPALAPA" ~ "Iztapalapa"
   )) |>
   dplyr::rename(ALCALDIA = nomgeo)
 ```
@@ -191,8 +188,10 @@ zona en la que sospechamos está sobre-concentrado el transporte público.
 
 ```{R, mapa-alc, echo=FALSE}
 ggplot(data = alc) +
-  geom_sf(aes(fill = ALCALDIA), show.legend=FALSE) +
-  geom_sf_label(aes(label = ALCALDIA))
+  geom_sf(show.legend=FALSE) +
+  geom_sf_label(
+    aes(label = ALCALDIA)
+  )
 ```
 
 Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena
@@ -291,7 +290,8 @@ info |>
     ) +
     scale_fill_gradient(
       name = "Población",
-      trans = "log"
+      trans = "log",
+      na.value = "gray"
     )
 ```
 
@@ -312,7 +312,12 @@ info |>
   ggplot(aes(fill=EST_TOTAL, geometry=geometry)) +
     geom_sf() + 
     labs(
-      title = "Alcaldías coloreadas por total de estaciones de transporte público al 2020"
+      title = "Total de estaciones por alcaldía."
+    ) +
+    scale_fill_gradient(
+      name = "Total de estaciones",
+      trans = "log",
+      na.value = "gray"
     )
 ```
 
@@ -340,8 +345,8 @@ esa distancia desde que se creó la primera línea del metro hasta la actualidad
 
 
 ```{R, echo=FALSE}
-ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST, fill=ALCALDIA)) +
-  geom_boxplot() + 
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
+  geom_boxplot(fill = "#56B1F7") + 
   coord_flip() + 
   labs(
     title = "Distancia promedio al transporte más cercano por alcaldía",
@@ -368,8 +373,8 @@ sigue siendo la alcaldía "peor conectada" por distancia.
 Otra cosa que podemos observar es que la línea en la caja que marca la media está en todos los caso mucho más cerca del extremo izquierdo de la caja. Lo cual nos quiere decir que los datos están sesgados, y que la mayoría está más cerca del lado de "distancia baja". En otras palabras, la distancia promedio mejoró muy rápidamente, lo cual sugiere que el sistema de transporte unificado evolucionó rápidamente para cubrir gran parte de la zona metropolitana.
 
 ```{R, echo=FALSE}
-ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL, fill=ALCALDIA)) +
-  geom_boxplot() + 
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
+  geom_boxplot(fill = "#56B1F7") + 
   coord_flip() + 
   labs(
     title = "Total de estaciones por alcaldía a través del tiempo.",
@@ -465,10 +470,11 @@ info |>
       title = "Distancia al transporte más cercano",
     ) +
     scale_fill_gradient(
-      name = "Distancia promedio",
+      name = "Distancia en metros",
       trans = "log",
       high = "#132B43",
-      low = "#56B1F7"
+      low = "#56B1F7",
+      na.value = "gray"
     )
 ```
 
@@ -488,14 +494,19 @@ ggplot(data=info, mapping=aes(x=AÑO, y=POBLACION, color=ALCALDIA)) +
 ```
 
 
-## PCA
+# PCA
 
-## Correlación canónica
+# Correlación canónica
 
-## Analisis Factorial
+# Analisis Factorial
 
-### Pruebas de hipótesis
+## Pruebas de hipótesis
 
-## Regresión lineal
+# Regresión lineal
+Una de las herramientas que revisamos en el curso que tiene mayor poder para
+establecer relaciones entre variables es la regresión lineal. La usaremos para
+investigar qué efectos tiene sobre [índice de movilidad calculado antes o alguna
+de las métricas de conectividad] la población y la distancia promedio de la
+alcaldía a la zona centro de la ciudad. Ajustaremos el siguiente modelo lineal: 
 
-## Interpretación, conclusiones, etc...
+# Interpretación, conclusiones, etc...

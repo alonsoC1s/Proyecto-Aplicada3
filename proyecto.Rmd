@@ -32,8 +32,8 @@ info <- read.csv('data/datosfinales.csv')
 # Planteamiento del problema
 
 La Ciudad de México es una de las 10 ciudades más grandes del mundo por
-población con `r info |> dplyr::filter(AÑO == 2020) |> summarize(sum(POBLACION))
-as.numeric() |> format(big.mark=",")` habitantes al 2020, sin contar la zona
+población con `r info |> dplyr::filter(AÑO == 2021) |> summarize(sum(POBLACION))
+as.numeric() |> format(big.mark=",")` habitantes al 2021, sin contar la zona
 metropolitana que incluye zonas del Estado de México e Hidalgo.  Una población
 de este tamaño exige un sistema de transporte público masivo de alta frecuencia,
 volumen y disponibilidad. El sistema de transporte público unificado en la
@@ -281,14 +281,14 @@ distribución geográfica de la población en la CDMX.
 
 ```{R, echo = FALSE}
 info |>
-  dplyr::filter(AÑO == 2020) |>
+  dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
   dplyr::select(ALCALDIA, POBLACION) |>
   dplyr::right_join(alc, by="ALCALDIA") |>
   ggplot(aes(fill=POBLACION, geometry=geometry)) +
     geom_sf() +
     labs(
-      title = "Alcaldías coloreadas por población al 2020"
+      title = "Alcaldías coloreadas por población al 2021"
     ) +
     scale_fill_gradient(
       name = "Población",
@@ -303,11 +303,11 @@ y Álvaro Obregón. Tanto Iztapalapa como GAM están en la periferia de la ciuda
 y ninguna de las tres más pobladas está en la "zona centro".
 
 En la figura [] vemos las alcaldías coloreadas dependiendo de cuantas estaciones
-de transporte público al año 2020 tienen en total.
+de transporte público al año 2021 tienen en total.
 
 ```{R, echo = FALSE}
 info |>
-  dplyr::filter(AÑO == 2020) |>
+  dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
   dplyr::select(ALCALDIA, EST_TOTAL) |>
   dplyr::right_join(alc, by="ALCALDIA") |>
@@ -324,7 +324,7 @@ info |>
 ```
 
 Las alcaldías con el mayor número total de estaciones de transporte público al
-año 2020 son Cuauhtémoc, GAM y Venustiano Carranza en ese orden. De la lista de
+año 2021 son Cuauhtémoc, GAM y Venustiano Carranza en ese orden. De la lista de
 alcaldías más pobladas solo coinciden Gustavo A. Madero. Notablemente Iztapalapa
 parece tener un déficit de transporte público al ser la alcaldía más poblada por
 un margen alto, con más de 1 millón de habitantes, pero siendo la cuarta con más
@@ -335,7 +335,7 @@ baja densidad poblacional, pero en Cuajimalpa no solo hay áreas densamente
 pobladas, sino que hay áreas de suma importancia comercial como la zona de Santa
 Fe.
 
-Hasta el momento hemos tomado la información en el punto de tiempo más reciente al que tenemos acceso: al año 2020. Para hacer un análisis más robusto tomamos en cuenta el componente temporal y estudiamos cómo ha cambiado la "conectividad" de diversas alcaldías con el paso del tiempo.
+Hasta el momento hemos tomado la información en el punto de tiempo más reciente al que tenemos acceso: al año 2021. Para hacer un análisis más robusto tomamos en cuenta el componente temporal y estudiamos cómo ha cambiado la "conectividad" de diversas alcaldías con el paso del tiempo.
 
 En la figura [] se puede ver un _boxplot_ que ayuda a entender la evolución de
 la conectividad como función del tiempo. En ella comparamos las distancias
@@ -462,14 +462,14 @@ sistema.
 
 ```{R, echo = FALSE}
 info |>
-  dplyr::filter(AÑO == 2020) |>
+  dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
   dplyr::select(ALCALDIA, MEAN_DIST) |>
   dplyr::right_join(alc, by="ALCALDIA") |>
   ggplot(aes(fill = MEAN_DIST, geometry = geometry)) +
     geom_sf() +
     labs(
-      title = "Distancia al transporte más cercano",
+      title = "Distancia promedio al transporte más cercano",
     ) +
     scale_fill_gradient(
       name = "Distancia en metros",
@@ -511,41 +511,135 @@ screeplot(z)
 ```
 # Construcción de un índice de conectividad
 
-Aquí construimos un índice de conectividad basado en los datos del año 2021. El índice lo construimos por medio del análisis factorial. Las variables utilizadas serán: población, distancia promedio a las estaciones, y cantidad de estaciones en la alcaldía. La prueba barlett indica que las correlaciones son significativas y la prueba KMO indica una adecuación medianamente regular.
-```{r}
+Aquí construimos un índice de conectividad basado en los datos del año 2021. El
+índice lo construimos por medio del análisis factorial. Las variables utilizadas
+serán: población, distancia promedio a las estaciones, y cantidad de estaciones
+en la alcaldía. La prueba de esfericidad de Bartlett indica que las
+correlaciones son significativas y la prueba Kaiser--Meyer--Olkin (KMO) indica
+una adecuación medianamente regular.
+```{r, echo=F}
 df2 <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df2 <- df2[df2$AÑO == 2021,]
 rownames(df2) <- df2$ALCALDIA
-df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST, POBLACION))
+# df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST, POBLACION))
+df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST))
+```
+
+Las pruebas de Bartlett y KMO dicen lo siguiente:
+```{R}
 bartlett.test(df2)
 KMO(cor(df2))
 ```
 
 
-
-El gráfico de sedimentación (scree plot en inglés) indica que un factor es suficiente en este caso. 
-```{r}
+El gráfico de sedimentación (scree plot en inglés) indica que un factor es
+suficiente en este caso. 
+```{r, echo=F}
 scree(df2) #sugiere de 3 a 6 factores
 ```
 
-Al ver el modelo generado, vemos que el factor o constructo contrasta la población y cantidad de estaciones contra la distancia media a las mismas. Un valor muy alto del índice indicaría que tienes mucha población o estaciones, mientras que un índice bajo indicaría una valor mucho mayor de la distancia respecto a las estaciones y a la población. 
-```{r}
+Al ver el modelo generado, vemos que el factor o constructo contrasta la
+población y cantidad de estaciones contra la distancia media a las mismas. Un
+valor muy alto del índice indicaría que tienes mucha población o estaciones,
+mientras que un índice bajo indicaría una valor mucho mayor de la distancia
+respecto a las estaciones y a la población. 
+```{r, echo=F}
 modelo <- fa(df2, nfactors =1, fm = "ml", rotate = "varimax")
 print(modelo)
 fa.diagram(modelo)
 ```
-Construimos ahora el índice para cada delegación en 2021. Podemos ver que las delegaciones con el índice más alto coinciden con las delegaciones con más estaciones y más población, que son las de la zona centro e Iztapalapa.
-```{r}
+Construimos ahora el índice para cada delegación en 2021. Podemos ver que las
+delegaciones con el índice más alto coinciden con las delegaciones con más
+estaciones y más población, que son las de la zona centro e Iztapalapa.
+```{r, echo=F}
 indice <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
 indice <- data.frame(indice, rango = apply(indice, 1, sum))
 indice[order(indice$rango, decreasing = T),]
 indice <- indice[order(indice$ML1, decreasing = F),]
 indice <- subset(indice, select=-c(rango))
+# Mio
+indice <- 1 - indice
+```
+
+```{r, echo=F}
+barplot(t(as.matrix(indice)), horiz = T, las = 2, col = c("red"))
 ```
 
 
-```{r}
-barplot(t(as.matrix(indice)), horiz = T, las = 2, col = c("red"))
+```{r, echo=F}
+indice |>
+  tibble::rownames_to_column(var = "ALCALDIA") |>
+  dplyr::as_tibble() |>
+  ggplot(mapping=aes(x = ML1, y = ALCALDIA)) +
+    geom_col(fill="gray") +
+    labs(
+      x = "Índice de conectividad",
+      y = "Alcaldía",
+      title = "Índice de conectividad por alcaldía al 2021"
+    )
+```
+
+```{r, echo=F}
+indice |>
+  tibble::rownames_to_column(var = "ALCALDIA") |>
+  dplyr::as_tibble() |>
+  dplyr::right_join(alc, by = "ALCALDIA") |>
+  ggplot(aes(fill = ML1, geometry = geometry)) +
+    geom_sf() +
+    labs(
+      title = "Alcaldías por conectividad al 2021",
+    ) +
+    scale_fill_gradient(
+      name = "Conectividad",
+      trans = "exp",
+      na.value = "gray"
+    )
+```
+
+## Análisis del índice de conectividad por año
+Queremos ver cómo ha evolucionado el índice de conectividad de las diversas alcaldías a medida que ha ido creciendo el sistema de transporte unificado.
+
+```{R, echo=F}
+indexiza <- function(df){
+  modelo <- df |>
+    dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
+    tibble::column_to_rownames("ALCALDIA") |>
+    dplyr::select(EST_TOTAL, MEAN_DIST) |>
+    fa(nfactors = 1, fm = "ml", rotate = "varimax")
+
+  indice <- modelo$scores |>
+    data.frame() |>
+    tibble::rownames_to_column(var = "ALCALDIA") |>
+    as_tibble() |>
+    dplyr::mutate(score = (ML1 - min(ML1))/(max(ML1)-min(ML1)))
+
+  min_alc <- dplyr::filter(indice, score == min(score))$ALCALDIA[1]
+  cua <- "Cuauhtémoc"
+
+  # Marranada porque a veces se "voltea" el orden
+  if (min_alc == cua) {
+    indice <- dplyr::mutate(indice, score = 1 - score)
+    return(indice)
+  }
+
+  return(indice)
+}
+```
+
+```{R, echo=F}
+con_by_year <- info |>
+  group_by(AÑO) |>
+  #dplyr::select(EST_TOTAL, MEAN_DIST, AÑO, ALCALDIA) |>
+  group_modify(~ indexiza(.x))
+
+ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
+  geom_line()
+```
+
+```{R, echo=F}
+ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
+  geom_boxplot(fill = "#56B1F7") + 
+  coord_flip()
 ```
 
 # Analisis Factorial

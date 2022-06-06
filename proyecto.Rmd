@@ -20,7 +20,9 @@ library(ggplot2)
 library(corrplot)
 library(dplyr)
 library(stargazer)
-library(sf)
+library(sf)    # hacer gráficas informativas de una matriz de correlaciones.
+library(psych)       # funciones relevantes para PCA y FA
+library(FactoMineR) 
 ```
 ```{r, echo = FALSE}
 # Cargamos los datos:
@@ -495,8 +497,56 @@ ggplot(data=info, mapping=aes(x=AÑO, y=POBLACION, color=ALCALDIA)) +
 
 
 # PCA
+```{r}
+df <- info[info$ALCALDIA != 'Álvaro Obregón',]
+df <- subset(df, select=-c(ALCALDIA))
 
-# Correlación canónica
+```
+
+
+```{r}
+z <- princomp(df, cor = T)
+summary(z, loadings = TRUE)
+screeplot(z)
+```
+# Construcción de un índice de conectividad
+
+Aquí construimos un índice de conectividad basado en los datos del año 2021. El índice lo construimos por medio del análisis factorial. Las variables utilizadas serán: población, distancia promedio a las estaciones, y cantidad de estaciones en la alcaldía. La prueba barlett indica que las correlaciones son significativas y la prueba KMO indica una adecuación medianamente regular.
+```{r}
+df2 <- info[info$ALCALDIA != 'Álvaro Obregón',]
+df2 <- df2[df2$AÑO == 2021,]
+rownames(df2) <- df2$ALCALDIA
+df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST, POBLACION))
+bartlett.test(df2)
+KMO(cor(df2))
+```
+
+
+
+El gráfico de sedimentación (scree plot en inglés) indica que un factor es suficiente en este caso. 
+```{r}
+scree(df2) #sugiere de 3 a 6 factores
+```
+
+Al ver el modelo generado, vemos que el factor o constructo contrasta la población y cantidad de estaciones contra la distancia media a las mismas. Un valor muy alto del índice indicaría que tienes mucha población o estaciones, mientras que un índice bajo indicaría una valor mucho mayor de la distancia respecto a las estaciones y a la población. 
+```{r}
+modelo <- fa(df2, nfactors =1, fm = "ml", rotate = "varimax")
+print(modelo)
+fa.diagram(modelo)
+```
+Construimos ahora el índice para cada delegación en 2021. Podemos ver que las delegaciones con el índice más alto coinciden con las delegaciones con más estaciones y más población, que son las de la zona centro e Iztapalapa.
+```{r}
+indice <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
+indice <- data.frame(indice, rango = apply(indice, 1, sum))
+indice[order(indice$rango, decreasing = T),]
+indice <- indice[order(indice$ML1, decreasing = F),]
+indice <- subset(indice, select=-c(rango))
+```
+
+
+```{r}
+barplot(t(as.matrix(indice)), horiz = T, las = 2, col = c("red"))
+```
 
 # Analisis Factorial
 

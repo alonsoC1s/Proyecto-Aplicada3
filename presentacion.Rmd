@@ -1,5 +1,5 @@
 ---
-title: "Proyecto Estadística Aplicada III"
+title: "Presentación Estadística Aplicada III"
 author:
 - Alonso Martinez Cisneros
 - Juan Carlos Sigler Priego
@@ -9,7 +9,7 @@ output:
   bookdown::pdf_document2:
     latex_engine: xelatex
     toc: true
-date: '2022-05-10'
+date: '2022-06-06'
 bibliography: refs.bib
 lang: "es"
 ---
@@ -31,51 +31,21 @@ info <- read.csv('data/datosfinales.csv')
 
 # Planteamiento del problema
 
-La Ciudad de México es una de las 10 ciudades más grandes del mundo por
-población con `r info |> dplyr::filter(AÑO == 2021) |> summarize(sum(POBLACION))
-as.numeric() |> format(big.mark=",")` habitantes al 2021, sin contar la zona
-metropolitana que incluye zonas del Estado de México e Hidalgo.  Una población
-de este tamaño exige un sistema de transporte público masivo de alta frecuencia,
-volumen y disponibilidad. El sistema de transporte público unificado en la
-Ciudad de México es en nuestra opinión uno relativamente bien planeado y
-accesible. Sin embargo, como personas que no vivimos en la periferia de la zona
-metropolitana nuestras opiniones pueden estar sesgadas.
+- Transporte público en la Ciudad de México.
+- `r info |> dplyr::filter(AÑO == 2021) |> summarize(sum(POBLACION))
+as.numeric() |> format(big.mark=",")` habitantes
+- ¿Bien planeado y accesible?
 
-El objetivo de esta investigación es cuantificar el nivel de acceso de la
-población de distintas alcaldías de la ciudad a los diversos medios de
-transporte público masivo. Como transporte público masivo estamos tomando en
-cuenta los siguientes servicios de transporte unificado que ofrece la ciudad:
+- Objetivo: cuantificar el nivel de acceso de la población de distintas alcaldías a los diversios medios de transporte público:
+    - Metro
+    - Metrobus
+    - Tren Ligero
+    - Cablebus
 
-- Metro
-- Metrobus
-- Tren Ligero
-- Cablebus
+- Objetivo: es determinar que tan bien distribuido está el transporte público en la ciudad
 
-Elegimos concentrarnos en estos servicios por las siguientes características:
-
-1. Frecuencia. La frecuencia con la que pasan nuevos convoyes debe ser
-  relativamente alta. Por ejemplo, en horas pico pasan convoyes nuevos de metro y
-  metrobus en pocos minutos.
-
-2. Volumen. Nos concentramos en transportes de alto volumen, excluyendo peseros y microbuses.
-
-3. Unificado. Nos concentramos en el sistema de transporte unificado coordinado
-  por el gobierno de la Ciudad de México.
-
-Además de hacer una exploración el objetivo de esta investigación es determinar
-que tan bien distribuido está el transporte público en la ciudad. Como
-habitantes de la CDMX tenemos la sospecha de que el transporte público está muy
-centralizado en la zona del centro histórico. Es decir, sospechamos que el
-sistema de transporte público privilegia a las personas que viven en las
-delegaciones como Benito Juárez, Cuauhtémoc, etc... que no son necesariamente
-las delegaciones con las poblaciones más altas.
-
-Estas relaciones las exploraremos mediante diversas técnicas cubiertas en el
-curso. Primero que nada procedemos con análisis exploratorio para empezar a
-ganar intuición sobre el conjunto de datos. Más tarde aplicamos técnicas
-estadísticas para construir algo como un "índice de conectividad". Exploramos
-cómo se relaciona este índice con variables de interés como: centralidad medida
-en distancia a la zona del centro histórico, población, y otros factores.
+- Hipótesis: el transporte público está muy centralizado en la zona del centro histórico.
+    - Benito Juárez, Cuauhtémoc son zonas privilegiadas.
 
 # Análisis exploratorio
 
@@ -84,57 +54,34 @@ info |> head()
 summary(info)
 ```
 
-Hay 16 alcaldías. Cada alcaldía contiene datos de población y conectividad con
+ - Hay `r length(unique(info$ALCALDIA))` alcaldías. Cada alcaldía contiene datos de población y conectividad con
 el transporte público desde el año 1969 hasta el 2021.
 
-Para el análisis que vamos a llevar a cabo recabamos información de diversas
-fuentes para indicadores de movilidad para las alcaldías de la CDMX y cómo han
-evolucionado desde principios de la década de los 70.
-
-Tenemos información para `r length(unique(info$ALCALDIA))` alcaldías, las cuales
-son:
-```{R}
-unique(info$ALCALDIA) # |> pprint()
-```
-
-Tenemos información para los siguientes años:
-```{R}
-unique(info$AÑO)
-```
-
-Primero que nada, vemos algunas estadísticas de resumen de los datos.
+- Algunas estadísticas de resumen de los datos.
 
 ```{R}
 summary(info)
 ```
 
 ## Descripción de las variables de interés
-Las variables son las siguientes:
 
-- `AÑO`: El año en el cual están medidas las variables.
-- `ALCALDIA`: La demarcación territorial de delegación o Alcaldía al que
-  corresponden los datos.
-- `POBLACIÓN`: La población para cada alcaldía en el año dado.
-- `MEAN_DIST`: La distancia promedio de todas las zonas marcadas como
-  residenciales en la encuesta de uso de suelo a su estación de transporte público
-  masivo más cercano medida en metros.
-- `EST_TOTAL`: Número total de estaciones de transporte público masivo en la
-  alcaldía al año marcado.
-- `ZOC_DIST`: Distancia promedio de las zonas residenciales al zócalo de la
-  ciudad.
+- Variables
+    - `AÑO`: El año en el cual están medidas las variables.
+    - `ALCALDIA`: La demarcación territorial de delegación o Alcaldía al que corresponden los datos.
+    - `POBLACIÓN`: La población para cada alcaldía en el año dado.
+    - `MEAN_DIST`: La distancia promedio de todas las zonas marcadas como residenciales en la encuesta de uso de suelo a su estación de transporte público masivo más cercano medida en metros.
+    - `EST_TOTAL`: Número total de estaciones de transporte público masivo en la alcaldía al año marcado.
+    - `ZOC_DIST`: Distancia promedio de las zonas residenciales al zócalo de la ciudad.
 
-Las variables fueron construidas a partir de diferentes conjuntos de datos
-abiertos al público. No encontramos una base de datos que tuviera lista para
-usarse toda la información que era necesaria para el análisis, menos aún como
-función del tiempo. En las siguientes secciones ahondamos en algunos detalles
-técnicos de cómo se obtuvieron, limpiaron, y trabajaron datos faltantes. 
+
+## Construcción de la base de datos
 
 ### Número total de estaciones por delegación
-Para encontrar el número de estaciones de transporte público masivo por
-delegación a un año dado utilizamos los conjuntos de datos \cite{metrobus,
-metro, corredorverde}. En la figura \@ref(fig:mapa-lineas) se pueden ver todas
-las líneas de transporte público consideradas sobre el mapa de la CDMX con
-división política. 
+
+- Ubicación de líneas y estaciones del Metrobús
+- Ubicación de líneas y estaciones del Sistema de Transporte
+  Colectivo Metro
+- Ubicación de líneas y estaciones/paradas del Servicio de Transportes Eléctricos
 
 ```{R, echo=FALSE}
 alc <- read_sf("data/alcaldias_cdmx/alcaldías_cdmx/alcaldias_cdmx.shp")
@@ -178,16 +125,6 @@ ggplot(mapping = aes(color = SISTEMA)) +
   )
 ```
 
-Como se puede ver en la figura, hay razón para sospechar que el transporte
-público está concentrado al centro y norte del territorio, al menos a primera
-vista y sin no se conoce bien la ciudad. La mayor carencia aparente es al sur de
-la ciudad. En la figura \@ref(fig:mapa-alc) presentamos un mapa de la ciudad con
-divisiones políticas para hacer más fácil referirnos a alcaldías específicas.
-
-A partir de ahora nos referimos a la "zona centro" como la zona comprendida por
-las alcaldías: Miguel Hidalgo, Cuauhtémoc, Benito Juárez. Es precisamente esta
-zona en la que sospechamos está sobre-concentrado el transporte público.
-
 ```{R, mapa-alc, echo=FALSE}
 ggplot(data = alc) +
   geom_sf(show.legend=FALSE) +
@@ -196,57 +133,21 @@ ggplot(data = alc) +
   )
 ```
 
-Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena
-Contreras, Xochimilco y Milpa Alta. A comparación de las alcaldías al centro,
-las alcaldías en el sur tienen pocas estaciones, pocas líneas, y una baja
-cobertura en general. Más tarde tomamos en consideración la población y otros
-factores para comparar que tan fácil es acceso de la población de una alcaldía
-al sistema de transporte unificado. Uno de los factores clave para este análisis
-es la variable que llamamos `MEAN_DIST`: una métrica que utlizamos para medir que
-tan fácil es el acceso de una alcaldía al transporte unificado, la cual
-explicamos con más profundidad a continuación.
+- A simple vista se podría sospechar que el transporte público está concentrado al centro y norte del territorio.
+    - Centro: Miguel Hidalgo, Cuauhtémoc, Benito Juárez
+
+- Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa Alta.
 
 ### Distancia promedio al transporte público
-Para calcular una medida de acceso al transporte público nos pareció que tomar
-solamente la cantidad de estaciones en total contenidas dentro de los límites de
-una alcaldía sería muy insuficiente. Por ejemplo, alcaldías como Cuajimalpa y
-Magdalena Contreras que no tienen ninguna estación estarían efectivamente
-"desconectadas", pero eso no quiere decir que sus habitantes no tengan manera
-alguna de transportarse.
 
-Para estimar la "conectividad" tomamos información sobre el uso de suelo de la
-CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda
-\cite{usodesuelo}. Con esta información tomamos la localización de todas las
-zonas registradas como habitacional o residencial (e.g. habitacional comercial,
-habitacional multifamiliar) y usando un algoritmo conocido como BallTree
-calculamos a que distancia medida con la métrica Haversine está de la estación
-de transporte unificado más cercana. Asi obtenemos para cada zona residencial
-una distancia en metros, y después calculamos la media para cada alcaldía para
-cada año. Utilizamos esta información más tarde para hacer en análisis sobre
-conectividad por población al que hacíamos referencia. 
-
-Decidimos calcularlo de esta manera para tener una mejor idea de cómo es que el
-transporte está distribuido con respecto a la _población_ y dónde vive ésta. Si
-tomáramos por ejemplo número total de estaciones normalizado por área las
-alcaldías como Milpa Alta o Tlalpan mostrarían un sesgo considerable dado que
-son muy grandes en términos de área pero su población es mucho menor a otras
-alcaldías mucho más pequeñas. Teniendo distancia promedio medida en metros con
-la métrica Haversine y además la población podemos controlar tanto por el efecto
-de densidad poblacional como el fenómeno de distribución de la misma. Para dar
-otro ejemplo, si se tomara la distancia con los extremos de los límites de la
-alcaldías veríamos que Cuajimalpa está peor conectado de el valor real. ¿Por
-qué? Porque por un extremo tenemos la zona Observatorio y por la otra Desierto
-de los Leones. Desierto de los Leones está mucho más lejos de la zona de
-cobertura del transporte, pero la población ahi es mucho más pequeña que la de
-la zona Observatorio, por poner un ejemplo.
-
-Vale la pena mencionar que una de las debilidades de este análisis es la falta
-de información completa. En el conjunto de datos que se utilizó para obtener la
-distancia promedio no hay ningún registro de las zonas habitacionales para la
-alcaldía Álvaro Obregón, a pesar de que es una de las más pobladas. Ignoramos la
-razón de esta falta de datos, pero es razonable pensar que hay otras carencias
-que no se pueden distinguir a simple vista y que podrían estar sesgando nuestro
-análisis.
+- `MEAN_DIST`
+- Cómo es que el transporte está distribuido con respecto a la _población_ y dónde vive ésta.
+- Ideas insuficientes
+    - Cantidad de estaciones en total contenidas dentro de los límites de una alcaldía
+    - Número total de estaciones normalizado por área las alcaldías
+- Conectividad: distancia promedio por alcaldía de las zonas residenciales al transporte más cercano.
+- Uso de suelo de la CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda.
+    - Falta Álvaro Obregón, una de las más pobladas
 
 ### Número total de estaciones & distancia a la zona centro
 Para complementar nuestro análisis de conectividad utilizamos otras dos
@@ -652,7 +553,7 @@ establecer relaciones entre variables es la regresión lineal. La usaremos para
 investigar qué efectos tiene sobre [índice de movilidad calculado antes o alguna
 de las métricas de conectividad] la población y la distancia promedio de la
 alcaldía a la zona centro de la ciudad. Primero se ajusta un modelo multivariado
-donde `EST_TOTAL` y `MEAN_DIST` (total de estaciones y distancia promedio a la
+donde EST_TOTAL y MEAN_DIST (total de estaciones y distancia promedio a la
 estación más cercana) son las variables de respuesta. Más tarde hacemos la
 regresión sobre el índice calculado.
 

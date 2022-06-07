@@ -114,16 +114,16 @@ summary(info)
 ## Descripción de las variables de interés
 Las variables son las siguientes:
 
-- AÑO: El año en el cual están medidas las variables.
-- ALCALDIA: La demarcación territorial de delegación o Alcaldía al que
+- `AÑO`: El año en el cual están medidas las variables.
+- `ALCALDIA`: La demarcación territorial de delegación o Alcaldía al que
   corresponden los datos.
-- POBLACIÓN: La población para cada alcaldía en el año dado.
-- MEAN_DIST: La distancia promedio de todas las zonas marcadas como
+- `POBLACIÓN`: La población para cada alcaldía en el año dado.
+- `MEAN_DIST`: La distancia promedio de todas las zonas marcadas como
   residenciales en la encuesta de uso de suelo a su estación de transporte público
   masivo más cercano medida en metros.
-- EST_TOTAL: Número total de estaciones de transporte público masivo en la
+- `EST_TOTAL`: Número total de estaciones de transporte público masivo en la
   alcaldía al año marcado.
-- ZOC_DIST: Distancia promedio de las zonas residenciales al zócalo de la
+- `ZOC_DIST`: Distancia promedio de las zonas residenciales al zócalo de la
   ciudad.
 
 Las variables fueron construidas a partir de diferentes conjuntos de datos
@@ -205,7 +205,7 @@ las alcaldías en el sur tienen pocas estaciones, pocas líneas, y una baja
 cobertura en general. Más tarde tomamos en consideración la población y otros
 factores para comparar que tan fácil es acceso de la población de una alcaldía
 al sistema de transporte unificado. Uno de los factores clave para este análisis
-es la variable que llamamos MEAN_DIST: una métrica que utlizamos para medir que
+es la variable que llamamos `MEAN_DIST`: una métrica que utlizamos para medir que
 tan fácil es el acceso de una alcaldía al transporte unificado, la cual
 explicamos con más profundidad a continuación.
 
@@ -686,7 +686,7 @@ establecer relaciones entre variables es la regresión lineal. La usaremos para
 investigar qué efectos tiene sobre [índice de movilidad calculado antes o alguna
 de las métricas de conectividad] la población y la distancia promedio de la
 alcaldía a la zona centro de la ciudad. Primero se ajusta un modelo multivariado
-donde EST_TOTAL y MEAN_DIST (total de estaciones y distancia promedio a la
+donde `EST_TOTAL` y `MEAN_DIST` (total de estaciones y distancia promedio a la
 estación más cercana) son las variables de respuesta. Más tarde hacemos la
 regresión sobre el índice calculado.
 

@@ -704,7 +704,10 @@ coefs <- info_score |>
   dplyr::mutate(is.signif = case_when(
     p.value <= 0.1 ~ "signif",
     TRUE ~ "no signif"
-  ))
+  )) |>
+  dplyr::select(-statistic)
+
+kableFormat(coefs)
 ```
 
 # Interpretación, conclusiones, etc...

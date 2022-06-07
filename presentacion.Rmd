@@ -8,7 +8,7 @@ author:
 output:
   revealjs::revealjs_presentation:
     incremental: true
-    theme: night
+    theme: solarized
 date: '2022-06-06'
 bibliography: refs.bib
 lang: "es"
@@ -27,6 +27,13 @@ library(FactoMineR)
 ```{r, echo = FALSE}
 # Cargamos los datos:
 info <- read.csv('data/datosfinales.csv')
+```
+
+```{R, echo=FALSE}
+kableFormat <- function(df) {
+  df |> kableExtra::kable("html", booktabs = TRUE) %>% 
+    kableExtra::kable_styling(position = "center", latex_options = "hold_position")
+}
 ```
 
 # Propuesta del Proyecto
@@ -59,35 +66,29 @@ info <- read.csv('data/datosfinales.csv')
 
 . . .
 
-```{R}
-info |> head()
+```{R, echo=FALSE}
+info |> head() |> kableFormat()
 ```
 
 ---
 
-```{R}
-summary(info)
+```{R, echo=F}
+summary(info) |> kableFormat()
 ```
 
 ## Descripción de las variables de interés
 
-- Variables
-    - `AÑO`
-    - `ALCALDIA`
-    - `POBLACIÓN`
-    - `MEAN_DIST`
-    - `EST_TOTAL`
-    - `ZOC_DIST`
+- `AÑO`
+- `ALCALDIA`
+- `POBLACIÓN`
+- `MEAN_DIST`
+- `EST_TOTAL`
+- `ZOC_DIST`
 
 
 ## Construcción de la base de datos
 
 ### Número total de estaciones por delegación
-
-- Ubicación de líneas y estaciones del Metrobús
-- Ubicación de líneas y estaciones del Sistema de Transporte
-  Colectivo Metro
-- Ubicación de líneas y estaciones/paradas del Servicio de Transportes Eléctricos
 
 ```{R, echo=FALSE}
 alc <- read_sf("data/alcaldias_cdmx/alcaldías_cdmx/alcaldias_cdmx.shp")
@@ -131,6 +132,8 @@ ggplot(mapping = aes(color = SISTEMA)) +
   )
 ```
 
+---
+
 ```{R, mapa-alc, echo=FALSE}
 ggplot(data = alc) +
   geom_sf(show.legend=FALSE) +
@@ -144,6 +147,8 @@ ggplot(data = alc) +
 
 - Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa Alta.
 
+---
+
 ### Distancia promedio al transporte público
 
 - `MEAN_DIST`
@@ -155,12 +160,16 @@ ggplot(data = alc) +
 - Uso de suelo de la CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda.
     - Falta Álvaro Obregón, una de las más pobladas
 
+---
+
 ### Número total de estaciones & distancia a la zona centro
 
 - Total de estaciones dentro de la alcaldía por año para tomar en cuenta cómo ha evolucionado el sistema de transporte unificado.
 - La distancia a la zona centro se toma como la distancia promedio de las mismas zonas residenciales al zócalo de la ciudad.
     - Zócalo como punto central puesto que es una de las zonas más antiguas y por lo tanto el crecimiento de la zona metropolitana de la ciudad ha sido radialmente hacia afuera de esta zona. 
     - Las primeras estaciones de metro y metrobus fueron construidas precisamente para servir a la zona centro.
+
+---
 
 ## Acceso a transporte con base en la población
 
@@ -185,6 +194,8 @@ info |>
     )
 ```
 
+---
+
 ```{R, echo = FALSE}
 info |>
   dplyr::filter(AÑO == 2021) |>
@@ -202,6 +213,8 @@ info |>
       na.value = "gray"
     )
 ```
+
+---
 
 ### Evolución de la conectividad como función del tiempo
 
@@ -221,6 +234,8 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
 - Tláhuac, Cuajimalpa y Milpa Alta son los de mayor distancia y variación.
 - Sesgo a la izquierda: el sistema evolucionó rápidamente para cubrir gran parte de la zona metropolitana.
 
+---
+
 ### Total de estaciones por alcaldía a través del tiempo
 
 ```{R, echo=FALSE}
@@ -238,6 +253,7 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
 de la zona centro excede vastamente el de las alcaldías más periféricas
 - Caso Cuauhtémoc y Benito Juárez: privilegiando a la zona centro.
 
+---
 
 ### Análisis de Correlación
 
@@ -256,6 +272,8 @@ info |>
 
 - Correlaciones son aparentemente débiles, pero notables.
 
+---
+
 ### Matriz explícita de correlaciones
 
 ```{R, echo = FALSE}
@@ -265,10 +283,10 @@ info |>
   dplyr::filter(!is.na(MEAN_DIST)) |>
   dplyr::filter(!is.na(ZOC_DIST)) |>
   #dplyr::select(-POBLACION) |>
-  cor()
+  cor() |> kableFormat()
 ```
 
-. . .
+---
 
 ```{R, echo = FALSE}
 info |>
@@ -294,14 +312,14 @@ info |>
 
 # PCA
 
-```{r}
+```{r, echo=F}
 df <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df <- subset(df, select=-c(ALCALDIA))
 z <- princomp(df, cor = T)
 summary(z, loadings = TRUE)
 ```
 
-. . .
+---
 
 ```{r}
 screeplot(z)

@@ -6,9 +6,9 @@ author:
 - Carlos Delgado
 - Esmeralda Altamirano
 output:
-  bookdown::pdf_document2:
-    latex_engine: xelatex
-    toc: true
+  revealjs::revealjs_presentation:
+    incremental: true
+    theme: beige
 date: '2022-06-06'
 bibliography: refs.bib
 lang: "es"
@@ -29,35 +29,41 @@ library(FactoMineR)
 info <- read.csv('data/datosfinales.csv')
 ```
 
+# Propuesta del Proyecto
+
 # Planteamiento del problema
 
 - Transporte público en la Ciudad de México.
-- `r info |> dplyr::filter(AÑO == 2021) |> summarize(sum(POBLACION))
-as.numeric() |> format(big.mark=",")` habitantes
+- `r info |> dplyr::filter(AÑO == 2021) |> summarize(sum(POBLACION)) |> as.numeric() |> format(big.mark=",")` habitantes
 - ¿Bien planeado y accesible?
 
-- Objetivo: cuantificar el nivel de acceso de la población de distintas alcaldías a los diversios medios de transporte público:
+## Objetivos
+
+- Cuantificar el nivel de acceso de la población de distintas alcaldías a los diversios medios de transporte público:
     - Metro
     - Metrobus
     - Tren Ligero
     - Cablebus
 
-- Objetivo: es determinar que tan bien distribuido está el transporte público en la ciudad
+- Determinar que tan bien distribuido está el transporte público en la ciudad
 
-- Hipótesis: el transporte público está muy centralizado en la zona del centro histórico.
+## Hipótesis
+
+- El transporte público está muy centralizado en la zona del centro histórico.
     - Benito Juárez, Cuauhtémoc son zonas privilegiadas.
 
 # Análisis exploratorio
 
+- Hay `r length(unique(info$ALCALDIA))` alcaldías. 
+- Años: 1969-2021
+
+. . .
+
 ```{R}
 info |> head()
-summary(info)
 ```
 
- - Hay `r length(unique(info$ALCALDIA))` alcaldías. Cada alcaldía contiene datos de población y conectividad con
-el transporte público desde el año 1969 hasta el 2021.
-
-- Algunas estadísticas de resumen de los datos.
+---
 
 ```{R}
 summary(info)
@@ -66,12 +72,12 @@ summary(info)
 ## Descripción de las variables de interés
 
 - Variables
-    - `AÑO`: El año en el cual están medidas las variables.
-    - `ALCALDIA`: La demarcación territorial de delegación o Alcaldía al que corresponden los datos.
-    - `POBLACIÓN`: La población para cada alcaldía en el año dado.
-    - `MEAN_DIST`: La distancia promedio de todas las zonas marcadas como residenciales en la encuesta de uso de suelo a su estación de transporte público masivo más cercano medida en metros.
-    - `EST_TOTAL`: Número total de estaciones de transporte público masivo en la alcaldía al año marcado.
-    - `ZOC_DIST`: Distancia promedio de las zonas residenciales al zócalo de la ciudad.
+    - `AÑO`
+    - `ALCALDIA`
+    - `POBLACIÓN`
+    - `MEAN_DIST`
+    - `EST_TOTAL`
+    - `ZOC_DIST`
 
 
 ## Construcción de la base de datos
@@ -158,12 +164,8 @@ ggplot(data = alc) +
 
 ## Acceso a transporte con base en la población
 
-Como se mostró antes, el mapa de líneas de transporte público unificado muestra
-una concentración alta en la zona centro (alcaldías Cuauhtémoc, Miguel Hidalgo y
-Benito Juárez). Esta concentración sería deseable si éstas fueran las alcaldías
-más pobladas, ya que justamente una mayor densidad poblacional justifica mayor
-inversión en el sistema. Con ayuda de la figura [] podemos ver cómo es la
-distribución geográfica de la población en la CDMX.
+- Concentración alta de transporte en la zona centro.
+- Sin embargo, las alcaldías del centro **no** son las más pobladas.
 
 ```{R, echo = FALSE}
 info |>
@@ -183,14 +185,6 @@ info |>
     )
 ```
 
-Llama la atención que las alcaldías del centro efectivamente no son las más
-pobladas. Las dos alcaldías más pobladas son Iztapalapa, Gustavo A. Madero (GAM)
-y Álvaro Obregón. Tanto Iztapalapa como GAM están en la periferia de la ciudad,
-y ninguna de las tres más pobladas está en la "zona centro".
-
-En la figura [] vemos las alcaldías coloreadas dependiendo de cuantas estaciones
-de transporte público al año 2021 tienen en total.
-
 ```{R, echo = FALSE}
 info |>
   dplyr::filter(AÑO == 2021) |>
@@ -209,28 +203,7 @@ info |>
     )
 ```
 
-Las alcaldías con el mayor número total de estaciones de transporte público al
-año 2021 son Cuauhtémoc, GAM y Venustiano Carranza en ese orden. De la lista de
-alcaldías más pobladas solo coinciden Gustavo A. Madero. Notablemente Iztapalapa
-parece tener un déficit de transporte público al ser la alcaldía más poblada por
-un margen alto, con más de 1 millón de habitantes, pero siendo la cuarta con más
-estaciones de transporte público. También llama la atención que hay tres
-alcaldías que no tienen una sola estación de transporte público: Cuajimalpa,
-Magdalena Contreras y Milpa Alta. En el caso de Milpa Alta tiene sentido dada la
-baja densidad poblacional, pero en Cuajimalpa no solo hay áreas densamente
-pobladas, sino que hay áreas de suma importancia comercial como la zona de Santa
-Fe.
-
-Hasta el momento hemos tomado la información en el punto de tiempo más reciente al que tenemos acceso: al año 2021. Para hacer un análisis más robusto tomamos en cuenta el componente temporal y estudiamos cómo ha cambiado la "conectividad" de diversas alcaldías con el paso del tiempo.
-
-En la figura [] se puede ver un _boxplot_ que ayuda a entender la evolución de
-la conectividad como función del tiempo. En ella comparamos las distancias
-promedio a la estación de transporte público más cercano por alcaldía, donde
-cada observación corresponde a un año. Dado que esta distancia es estrictamente
-decreciente (no se ha dado el caso de que se elimine por completo una estación
-permanentemente), la dispersión de los datos nos dice cómo se ha ido reduciendo
-esa distancia desde que se creó la primera línea del metro hasta la actualidad.
-
+### Evolución de la conectividad como función del tiempo
 
 ```{R, echo=FALSE}
 ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
@@ -242,23 +215,13 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
     y = "Distancia al transporte en metros"
   )
 ```
-Podemos ver que las alcaldías de Cuauhtémoc, Benito Juárez y Venustiano Carranza
-tienen las menores varianzas en distancia media y además las más pequeñas. Estas
-alcaldías son precisamente la que definimos como "zona centro" desde el inicio.
-De esta observación confirmamos que la zona centro siempre ha estado muy bien
-conectada porque el sistema de transporte unificado fue construido pensando en
-servir específicamente a esta zona. Además, se puede notar que su distancia
-promedio promedio a la estación de transporte más cercana sigue siendo muy baja
-en comparación a otras alcaldías, incluso las más pobladas como Iztapalapa.
 
-Por otro lado, Tláhuac, Cuajimalpa y Milpa Alta son los de mayor distancia y
-variación. En el caso de Tlahuac por ejemplo, siendo una de las alcaldías más al
-sur, lo que interpretamos es que su distancia promedio a las primeras estaciones
-era excesivamente alta y fue disminuyendo a medida que mejoró la cobertura. En
-el cao de Cuajimalpa la distancia disminuyó dramáticamente pero al día de hoy,
-sigue siendo la alcaldía "peor conectada" por distancia.
+- Zona centro siempre ha estado bien conectada.
+  - Cuauhtémoc, Benito Juárez y Venustiano Carranza tienen las menores varianzas en distancia media y además las más pequeñas.
+- Tláhuac, Cuajimalpa y Milpa Alta son los de mayor distancia y variación.
+- Sesgo a la izquierda: el sistema evolucionó rápidamente para cubrir gran parte de la zona metropolitana.
 
-Otra cosa que podemos observar es que la línea en la caja que marca la media está en todos los caso mucho más cerca del extremo izquierdo de la caja. Lo cual nos quiere decir que los datos están sesgados, y que la mayoría está más cerca del lado de "distancia baja". En otras palabras, la distancia promedio mejoró muy rápidamente, lo cual sugiere que el sistema de transporte unificado evolucionó rápidamente para cubrir gran parte de la zona metropolitana.
+### Total de estaciones por alcaldía a través del tiempo
 
 ```{R, echo=FALSE}
 ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
@@ -271,35 +234,12 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
   )
 ```
 
-En la figura [] consideramos el número total de estaciones en la alcaldía como
-función del tiempo. Aqui podemos ver que el número de estaciones en las alcadías
-de la zona centro excede vastamente el de las alcaldías más periféricas, como
-Iztapalapa. Analizando la variabilidad mediante el ancho de la caja podemos ver
-también que por ejemplo en la alcaldía Cuauhtémoc y GAM se han construido muchas
-estaciones con el paso de los años. Lo cual nos da pistas por ejemplo en el caso
-de Cuauhtémoc que no solo comenzaron estando muy bien conectadas, la inversión
-ha continuado más y más a pesar de que era buena desde un inicio. El número
-total de estaciones en Cuauhtémoc ha llegado a casi 120, mientras que en la
-mayoría no se exceden las 50.
+- El número de estaciones en las alcadías
+de la zona centro excede vastamente el de las alcaldías más periféricas
+- Caso Cuauhtémoc y Benito Juárez: privilegiando a la zona centro.
 
-Otra cosa que llama la atención es el caso de Benito Juárez. El número total de
-estaciones no ha crecido tan dramáticamente como en las otras alcaldías de la
-zona centro, pero recordando su distancia promedio al transporte es una de las
-alcaldías mejor conectadas. Esto nos indica que a pesar de que no se han hecho
-muchas estaciones nuevas en sus límites territoriales, las que se han hecho han
-estado en la zona circundante y han mejorado su conectividad. Esa zona es
-precisamente la zona centro. Una pista más que indica que la inversión en
-creación de nuevas líneas ha estado privilegiando a la zona centro.
 
 ### Análisis de Correlación
-Si bien hasta ahora nos hemos servido de interpretar diversas gráficas para
-tomar intuición, si queremos cuantificar qué tan notorio es el efecto de
-inversión privilegiada en la zona centro tenemos que servirnos de otras técnicas
-estadísticas. Por ejemplo, si nuestra hipótesis tiene evidencia favorable
-esperaríamos observar una correlación positiva entre distancia al zócalo de la
-ciudad y la conectividad medida como distancia promedio al transporte más
-cercano y número total de estaciones. En la figura [] vemos un diagrama de
-correlación para las variables estudiadas.
 
 ```{R, echo=FALSE}
 info |>
@@ -311,19 +251,13 @@ info |>
   cor() |> corrplot(method="ellipse", tl.cex=0.75)
 ```
 
-Efectivamente se cumple que la correlación de distancia al Zocalo con distancia
-al transporte más cercano es positiva. Es decir, entre más se aleja la zona
-habitacional del zócalo, más se aleja de la zona de cobertura del sistema de
-transporte unificado. También se puede apreciar este fenómeno en la correlación
-negativa entre distancia al zócalo con el número total de estaciones. Es decir,
-entre más lejos está la alcaldía del zócalo menor es el número total de
-estaciones a las que se tiene acceso. Las correlaciones son aparentemente
-débiles, pero notables. Sospechamos que la correlación se hace más fuerte a
-medida que se va hacia atrás en el tiempo cuando había menos estaciones en
-total. El corolario es que esta conectividad si ha estado mejorando desde que se
-empezó a construir la primera linea de metro hasta la actualidad. 
+- La correlación de distancia al Zocalo con distancia al transporte más cercano es positiva
+- Correlación negativa entre distancia al zócalo con el número total de estaciones. 
 
-La matriz explícita de correlaciones es:
+- Correlaciones son aparentemente débiles, pero notables.
+
+### Matriz explícita de correlaciones
+
 ```{R, echo = FALSE}
 info |>
   dplyr::select_if(is.numeric) |>
@@ -334,17 +268,7 @@ info |>
   cor()
 ```
 
-Si graficamos la distancia promedio al sistema de transporte por alcaldía la
-correlación espacial entre distancia al centro de la ciudad aproximado mediante
-la posición del zócalo podremos tener indicación visual de si nuestra hipótesis
-tiene sentido. Como medida de visualización está bien, pero hay varios problemas
-con ella como método formal. Por ejemplo, que algunas alcaldías son muy "largas"
-y sus puntos más cercanos y más lejanos el centro de la ciudad serán coloreados
-del mismo color a pesar de que no tienen la misma conectividad. El mejor ejemplo
-de este caso es Álvaro Obregón. Su zona norte y oriente están bien conectadas:
-cerca de Tacubaya y con el corredor Insurgentes Sur respectivamente. Por otro
-lado, las zonas como Los Dínamos y Las Águilas están muy lejos del resto del
-sistema.
+. . .
 
 ```{R, echo = FALSE}
 info |>
@@ -366,35 +290,24 @@ info |>
     )
 ```
 
-[Aqui grafica perrona de correlación a través del tiempo.]
-
-```{R}
-```
-
-```{r, echo=FALSE}
-ggplot(data=info, mapping=aes(x=AÑO, y=POBLACION, color=ALCALDIA)) +
-  geom_line() + 
-  labs(
-    title = "Población por alcaldía por año",
-    x = "Año",
-    y = "Población"
-  )
-```
-
+- Correlación visual entre la distancia al transporte más cercano y la distancia al zócalo.
 
 # PCA
+
 ```{r}
 df <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df <- subset(df, select=-c(ALCALDIA))
-
-```
-
-
-```{r}
 z <- princomp(df, cor = T)
 summary(z, loadings = TRUE)
+```
+
+. . .
+
+```{r}
 screeplot(z)
 ```
+
+
 # Construcción de un índice de conectividad
 
 Aquí construimos un índice de conectividad basado en los datos del año 2021. El

@@ -22,7 +22,8 @@ library(dplyr)
 library(stargazer)
 library(sf)    # hacer gráficas informativas de una matriz de correlaciones.
 library(psych)       # funciones relevantes para PCA y FA
-library(FactoMineR) 
+library(FactoMineR)
+library(kableExtra)
 ```
 ```{r, echo = FALSE}
 # Cargamos los datos:
@@ -82,9 +83,11 @@ en distancia a la zona del centro histórico, población, y otros factores.
 
 # Análisis exploratorio
 
-```{R}
-info |> head()
-summary(info)
+```{R, echo=FALSE}
+kableFormat <- function(df) {
+  df |> kableExtra::kable("latex", booktabs = TRUE) %>% 
+    kableExtra::kable_styling(position = "center", latex_options = "hold_position")
+}
 ```
 
 Hay 16 alcaldías. Cada alcaldía contiene datos de población y conectividad con
@@ -96,19 +99,19 @@ evolucionado desde principios de la década de los 70.
 
 Tenemos información para `r length(unique(info$ALCALDIA))` alcaldías, las cuales
 son:
-```{R}
-unique(info$ALCALDIA) # |> pprint()
+```{R, echo=FALSE}
+unique(info$ALCALDIA)
 ```
 
 Tenemos información para los siguientes años:
-```{R}
+```{R, echo=FALSE}
 unique(info$AÑO)
 ```
 
 Primero que nada, vemos algunas estadísticas de resumen de los datos.
 
-```{R}
-summary(info)
+```{R, echo=FALSE}
+info |> head() |> kableFormat()
 ```
 
 ## Descripción de las variables de interés
@@ -458,7 +461,7 @@ info |>
   dplyr::filter(!is.na(MEAN_DIST)) |>
   dplyr::filter(!is.na(ZOC_DIST)) |>
   #dplyr::select(-POBLACION) |>
-  cor()
+  cor() |> kableFormat()
 ```
 
 Si graficamos la distancia promedio al sistema de transporte por alcaldía la
@@ -522,14 +525,13 @@ ggplot(data=info, mapping=aes(x=AÑO, y=POBLACION, color=ALCALDIA)) +
 
 
 # PCA
-```{r}
+```{R, echo=FALSE}
 df <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df <- subset(df, select=-c(ALCALDIA))
-
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 z <- princomp(df, cor = T)
 summary(z, loadings = TRUE)
 screeplot(z)
@@ -542,7 +544,8 @@ serán la distancia promedio a las estaciones y cantidad de estaciones
 en la alcaldía. La prueba de esfericidad de Bartlett indica que las
 correlaciones son significativas y la prueba Kaiser--Meyer--Olkin (KMO) indica
 una adecuación medianamente regular.
-```{r, echo=F}
+
+```{R, echo=FALSE}
 df2 <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df2 <- df2[df2$AÑO == 2021,]
 rownames(df2) <- df2$ALCALDIA
@@ -550,15 +553,20 @@ rownames(df2) <- df2$ALCALDIA
 df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST))
 ```
 
-Las pruebas de Bartlett y KMO dicen lo siguiente:
-```{R}
+Las pruebas de Bartlett dice lo siguiente:
+```{R, echo=FALSE}
 bartlett.test(df2)
+```
+
+Por otro lado, KMO dice lo siguiente:
+
+```{R, echo=FALSE}
 KMO(cor(df2))
 ```
 
 El gráfico de sedimentación (scree plot en inglés) indica que un factor es
 suficiente en este caso. 
-```{r, echo=F}
+```{R, echo=FALSE}
 scree(df2) #sugiere de 3 a 6 factores
 ```
 
@@ -575,18 +583,17 @@ fa.diagram(modelo)
 Construimos ahora el índice para cada delegación en 2021. Podemos ver que las
 delegaciones con el índice más alto coinciden con las delegaciones con más
 estaciones y más población, que son las de la zona centro e Iztapalapa.
-```{r, echo=F}
+```{R, include=FALSE}
 indice <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
 indice <- data.frame(indice, rango = apply(indice, 1, sum))
 indice[order(indice$rango, decreasing = T),]
 indice <- indice[order(indice$ML1, decreasing = F),]
 indice <- subset(indice, select=-c(rango))
-# Mio
 indice <- 1 - indice
 ```
 
-```{r, echo=F}
-barplot(t(as.matrix(indice)), horiz = T, las = 2, col = c("red"))
+```{R, echo=FALSE}
+kableFormat(indice)
 ```
 
 
@@ -697,6 +704,8 @@ coefs <- info_score |>
     TRUE ~ "no signif"
   )) |>
   dplyr::select(-statistic)
+
+kableFormat(coefs)
 ```
 
 Para interpretar el papel que juega la población en el incremento de

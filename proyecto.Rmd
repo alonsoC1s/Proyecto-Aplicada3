@@ -538,7 +538,7 @@ screeplot(z)
 
 Aquí construimos un índice de conectividad basado en los datos del año 2021. El
 índice lo construimos por medio del análisis factorial. Las variables utilizadas
-serán: población, distancia promedio a las estaciones, y cantidad de estaciones
+serán la distancia promedio a las estaciones y cantidad de estaciones
 en la alcaldía. La prueba de esfericidad de Bartlett indica que las
 correlaciones son significativas y la prueba Kaiser--Meyer--Olkin (KMO) indica
 una adecuación medianamente regular.

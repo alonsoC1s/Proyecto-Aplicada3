@@ -29,6 +29,9 @@ library(FactoMineR)
 info <- read.csv('data/datosfinales.csv')
 ```
 
+# Propuesta de proyecto
+
+
 # Planteamiento del problema
 
 La Ciudad de México es una de las 10 ciudades más grandes del mundo por
@@ -385,6 +388,16 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
   )
 ```
 
+```{r, echo=F}
+ggplot(data = info, mapping=aes(x=AÑO, EST_TOTAL, color=ALCALDIA)) +
+  geom_line() +
+  labs(
+    title = "Total de estaciones por alcaldía por año.",
+    x = "Año",
+    y = "Total de estaciones"
+  )
+```
+
 En la figura [] consideramos el número total de estaciones en la alcaldía como
 función del tiempo. Aqui podemos ver que el número de estaciones en las alcadías
 de la zona centro excede vastamente el de las alcaldías más periféricas, como
@@ -480,6 +493,18 @@ info |>
     )
 ```
 
+Ahora vemos cómo evoluciona como función del tiempo.
+
+```{r, echo = F}
+ggplot(info, mapping=aes(x=AÑO, y=MEAN_DIST, color=ALCALDIA)) +
+  geom_line() +
+  labs(
+    title = "Distancia promedio en metros por alc. por año.",
+    x = "Año",
+    y = "Distancia promedio en metros"
+  )
+```
+
 [Aqui grafica perrona de correlación a través del tiempo.]
 
 ```{R}
@@ -530,7 +555,6 @@ Las pruebas de Bartlett y KMO dicen lo siguiente:
 bartlett.test(df2)
 KMO(cor(df2))
 ```
-
 
 El gráfico de sedimentación (scree plot en inglés) indica que un factor es
 suficiente en este caso. 
@@ -636,15 +660,25 @@ ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
   geom_line()
 ```
 
+```{R, echo = FALSE}
+# Juntando con_by_year
+info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
+  dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
+  # Población de unidades a miles
+  dplyr::mutate(POBLACION = POBLACION / 1000) |>
+  # Distancia al zócalo de metros a kilómetros
+  dplyr::mutate(MEAN_DIST = MEAN_DIST / 1000) |> 
+  # Moviendo el score de 0,1 a 1,2 por div entre 0
+  dplyr::mutate(score = score + 1) |>
+  dplyr::mutate(ALCALDIA = as.factor(ALCALDIA))
+```
+
 ```{R, echo=F}
 ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
   geom_boxplot(fill = "#56B1F7") + 
   coord_flip()
 ```
 
-# Analisis Factorial
-
-## Pruebas de hipótesis
 
 # Regresión lineal
 Una de las herramientas que revisamos en el curso que tiene mayor poder para
@@ -657,8 +691,8 @@ estación más cercana) son las variables de respuesta. Más tarde hacemos la
 regresión sobre el índice calculado.
 
 ```{R}
-lm_m <- lm(cbind(EST_TOTAL, MEAN_DIST) ~ AÑO + ALCALDIA + POBLACION + ZOC_DIST, data=info)
-summary(lm_m)
+lm <- lm(score ~ AÑO +  ALCALDIA + POBLACION + ZOC_DIST, data=info_score, na.action=na.omit)
+summary(lm)
 ```
 
 # Interpretación, conclusiones, etc...

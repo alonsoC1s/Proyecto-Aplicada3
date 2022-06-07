@@ -150,29 +150,14 @@ ggplot(data = alc) +
     - Falta Álvaro Obregón, una de las más pobladas
 
 ### Número total de estaciones & distancia a la zona centro
-Para complementar nuestro análisis de conectividad utilizamos otras dos
-variables calculadas a partir de los conjuntos de datos ya mencionados. La
-primera de estas variables es el número total de estaciones de transporte
-público unificado que se encuentran dentro de los límites de una alcaldía dada
-para algún año fijo. Esto para tomar en cuenta cómo ha evolucionado el sistema
-de transporte unificado.
 
-La distancia a la zona centro se toma como la distancia promedio en la métrica
-Haversine de las mismas zonas residenciales mencionadas en el párrafo anterior
-al zócalo de la ciudad. Una vez más, se toma el promedio de estas distancias
-para la alcaldía y el año correspondiente.
+- Total de estaciones dentro de la alcaldía por año para tomar en cuenta cómo ha evolucionado el sistema de transporte unificado.
+- La distancia a la zona centro se toma como la distancia promedio de las mismas zonas residenciales al zócalo de la ciudad.
+    - Zócalo como punto central puesto que es una de las zonas más antiguas y por lo tanto el crecimiento de la zona metropolitana de la ciudad ha sido radialmente hacia afuera de esta zona. 
+    - Las primeras estaciones de metro y metrobus fueron construidas precisamente para servir a la zona centro.
 
-Reconocemos que la elección del zócalo de la ciudad como punto central puede
-parecer arbitraria. Sin embargo, nos parece justificable puesto que es una de
-las zonas más antiguas y por lo tanto el crecimiento de la zona metropolitana de
-la ciudad ha sido radialmente hacia afuera de esta zona. De manera similar, las
-primeras estaciones de metro y metrobus fueron construidas precisamente para
-servir a la zona centro.
+## Acceso a transporte con base en la población
 
-Con todas las variables a las que hicimos referencia podemos empezar el análisis
-principal y el objetivo de este trabajo.
-
-## Acceso a transporte con base en la población 
 Como se mostró antes, el mapa de líneas de transporte público unificado muestra
 una concentración alta en la zona centro (alcaldías Cuauhtémoc, Miguel Hidalgo y
 Benito Juárez). Esta concentración sería deseable si éstas fueran las alcaldías

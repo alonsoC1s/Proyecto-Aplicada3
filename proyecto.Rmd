@@ -595,7 +595,7 @@ indice |>
   tibble::rownames_to_column(var = "ALCALDIA") |>
   dplyr::as_tibble() |>
   ggplot(mapping=aes(x = ML1, y = ALCALDIA)) +
-    geom_col(fill="gray") +
+    geom_col(fill = "#56B1F7") +
     labs(
       x = "Índice de conectividad",
       y = "Alcaldía",
@@ -671,8 +671,6 @@ ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
 
 # Regresión lineal
 
-
-
 ```{R, echo = FALSE}
 # Juntando con_by_year
 info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
@@ -697,7 +695,15 @@ coefs <- info_score |>
   dplyr::mutate(is.signif = case_when(
     p.value <= 0.1 ~ "signif",
     TRUE ~ "no signif"
-  ))
+  )) |>
+  dplyr::select(-statistic)
 ```
+
+Para interpretar el papel que juega la población en el incremento de
+conectividad de una alcaldía utilizamos un modelo lineal por sus propiedades de
+interpretación. Estimamos el siguiente modelo:
+\begin{equation}
+\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) + \varepsilon_i 
+\end{equation}
 
 # Interpretación, conclusiones, etc...

@@ -621,7 +621,8 @@ indice |>
 ```
 
 ## Análisis del índice de conectividad por año
-Queremos ver cómo ha evolucionado el índice de conectividad de las diversas alcaldías a medida que ha ido creciendo el sistema de transporte unificado.
+Queremos ver cómo ha evolucionado el índice de conectividad de las diversas
+alcaldías a medida que ha ido creciendo el sistema de transporte unificado.
 
 ```{R, echo=F}
 indexiza <- function(df){
@@ -660,18 +661,6 @@ ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
   geom_line()
 ```
 
-```{R, echo = FALSE}
-# Juntando con_by_year
-info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
-  dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
-  # Población de unidades a miles
-  dplyr::mutate(POBLACION = POBLACION / 1000) |>
-  # Distancia al zócalo de metros a kilómetros
-  dplyr::mutate(MEAN_DIST = MEAN_DIST / 1000) |> 
-  # Moviendo el score de 0,1 a 1,2 por div entre 0
-  dplyr::mutate(score = score + 1) |>
-  dplyr::mutate(ALCALDIA = as.factor(ALCALDIA))
-```
 
 ```{R, echo=F}
 ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
@@ -681,18 +670,34 @@ ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
 
 
 # Regresión lineal
-Una de las herramientas que revisamos en el curso que tiene mayor poder para
-establecer relaciones entre variables es la regresión lineal. La usaremos para
-investigar qué efectos tiene sobre [índice de movilidad calculado antes o alguna
-de las métricas de conectividad] la población y la distancia promedio de la
-alcaldía a la zona centro de la ciudad. Primero se ajusta un modelo multivariado
-donde `EST_TOTAL` y `MEAN_DIST` (total de estaciones y distancia promedio a la
-estación más cercana) son las variables de respuesta. Más tarde hacemos la
-regresión sobre el índice calculado.
 
-```{R}
-lm <- lm(score ~ AÑO +  ALCALDIA + POBLACION + ZOC_DIST, data=info_score, na.action=na.omit)
-summary(lm)
+
+
+```{R, echo = FALSE}
+# Juntando con_by_year
+info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
+  dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
+  dplyr::filter(ALCALDIA != "Cuauhtémoc") |>
+  dplyr::filter(ALCALDIA != "Cuajimalpa") |>
+  # Población de unidades a miles
+  dplyr::mutate(
+    POBLACION = POBLACION / 1000,
+    # Distancia al zócalo de metros a kilómetros
+    MEAN_DIST = MEAN_DIST / 1000,
+    # Moviendo el score de 0,1 a 1,2 por div entre 0
+    score = score + 1,
+    ALCALDIA = as.factor(ALCALDIA)
+  ) 
+
+coefs <- info_score |>
+  group_by(ALCALDIA) |>
+  group_modify(~
+      lm(log(score) ~ log(AÑO) + log(POBLACION), data = .x) |> broom::tidy()
+    ) |>
+  dplyr::mutate(is.signif = case_when(
+    p.value <= 0.1 ~ "signif",
+    TRUE ~ "no signif"
+  ))
 ```
 
 # Interpretación, conclusiones, etc...

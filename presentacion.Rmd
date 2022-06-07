@@ -345,17 +345,25 @@ df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST))
 
 - Prueba de esfericidad de Bartlett 
   - Correlaciones son significativas
-  
-```{R}
+
+. . .  
+
+```{R, echo=F}
 bartlett.test(df2)
 ```
 
-- Kaiser--Meyer--Olkin (KMO)
-  - Adecuación medianamente regular.
+. . .
 
-```{R}
+- Kaiser--Meyer--Olkin (KMO)
+  - Adecuación medianamente regular
+
+. . .
+
+```{R, echo=F}
 KMO(cor(df2))
 ```
+
+---
 
 ### Gráfico de sedimentación (scree plot)
 
@@ -365,23 +373,33 @@ scree(df2) #sugiere de 3 a 6 factores
 
 - Un factor es suficiente 
 
+---
+
 ```{r, echo=F}
 modelo <- fa(df2, nfactors =1, fm = "ml", rotate = "varimax")
-print(modelo)
 fa.diagram(modelo)
 ```
 
+---
+
 ### Índice de conectividad 2021
 
-```{r, echo=F}
+```{R, include=FALSE}
 indice <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
 indice <- data.frame(indice, rango = apply(indice, 1, sum))
 indice[order(indice$rango, decreasing = T),]
 indice <- indice[order(indice$ML1, decreasing = F),]
 indice <- subset(indice, select=-c(rango))
-# Mio
 indice <- 1 - indice
+```
 
+```{R, echo=FALSE}
+kableFormat(indice)
+```
+
+---
+
+```{R, echo=F}
 indice |>
   tibble::rownames_to_column(var = "ALCALDIA") |>
   dplyr::as_tibble() |>
@@ -412,6 +430,8 @@ indice |>
       na.value = "gray"
     )
 ```
+
+---
 
 ## Análisis del índice de conectividad por año
 
@@ -454,6 +474,8 @@ ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
   geom_line()
 ```
 
+---
+
 ```{R, echo=F}
 ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
   geom_boxplot(fill = "#56B1F7") + 
@@ -462,18 +484,34 @@ ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
 
 # Regresión lineal
 
-Una de las herramientas que revisamos en el curso que tiene mayor poder para
-establecer relaciones entre variables es la regresión lineal. La usaremos para
-investigar qué efectos tiene sobre [índice de movilidad calculado antes o alguna
-de las métricas de conectividad] la población y la distancia promedio de la
-alcaldía a la zona centro de la ciudad. Primero se ajusta un modelo multivariado
-donde EST_TOTAL y MEAN_DIST (total de estaciones y distancia promedio a la
-estación más cercana) son las variables de respuesta. Más tarde hacemos la
-regresión sobre el índice calculado.
+```{R, echo = FALSE}
+# Juntando con_by_year
+info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
+  dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
+  dplyr::filter(ALCALDIA != "Cuauhtémoc") |>
+  dplyr::filter(ALCALDIA != "Cuajimalpa") |>
+  # Población de unidades a miles
+  dplyr::mutate(
+    POBLACION = POBLACION / 1000,
+    # Distancia al zócalo de metros a kilómetros
+    MEAN_DIST = MEAN_DIST / 1000,
+    # Moviendo el score de 0,1 a 1,2 por div entre 0
+    score = score + 1,
+    ALCALDIA = as.factor(ALCALDIA)
+  ) 
 
-```{R}
-lm_m <- lm(cbind(EST_TOTAL, MEAN_DIST) ~ AÑO + ALCALDIA + POBLACION + ZOC_DIST, data=info)
-summary(lm_m)
+coefs <- info_score |>
+  group_by(ALCALDIA) |>
+  group_modify(~
+      lm(log(score) ~ log(AÑO) + log(POBLACION), data = .x) |> broom::tidy()
+    ) |>
+  dplyr::mutate(is.signif = case_when(
+    p.value <= 0.1 ~ "signif",
+    TRUE ~ "no signif"
+  )) |>
+  dplyr::select(-statistic)
+
+kableFormat(coefs)
 ```
 
 # Interpretación, conclusiones, etc...

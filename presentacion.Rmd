@@ -1,5 +1,5 @@
 ---
-title: "Presentación Estadística Aplicada III"
+title: "Explorando la distribución del transporte público en la [cdmx]{.smallcaps}"
 author:
 - Alonso Martinez Cisneros
 - Juan Carlos Sigler Priego
@@ -9,7 +9,9 @@ output:
   revealjs::revealjs_presentation:
     incremental: true
     theme: solarized
-date: '2022-06-06'
+    self_contained: false
+    reveal_plugins: ["notes", "zoom", "menu"]
+date: 'Primavera 2022'
 bibliography: refs.bib
 lang: "es"
 ---
@@ -30,13 +32,19 @@ info <- read.csv('data/datosfinales.csv')
 ```
 
 ```{R, echo=FALSE}
-kableFormat <- function(df) {
-  df |> kableExtra::kable("html", booktabs = TRUE) %>% 
-    kableExtra::kable_styling(position = "center", latex_options = "hold_position")
+opts <- options(knitr.kable.NA = "")
+kableFormat <- function(df, ls='', ...) {
+  df |>
+  kableExtra::kable("html", booktabs = TRUE, linesep=ls, digits = 3, ...) |>
+  kableExtra::kable_styling(position = "center", latex_options = "hold_position")
 }
 ```
 
 # Propuesta del Proyecto
+
+. . .
+
+¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?
 
 # Planteamiento del problema
 
@@ -88,7 +96,7 @@ summary(info) |> kableFormat()
 
 ## Construcción de la base de datos
 
-### Número total de estaciones por delegación
+### Número total de estaciones por alcaldía
 
 ```{R, echo=FALSE}
 alc <- read_sf("data/alcaldias_cdmx/alcaldías_cdmx/alcaldias_cdmx.shp")
@@ -142,39 +150,44 @@ ggplot(data = alc) +
   )
 ```
 
-- A simple vista se podría sospechar que el transporte público está concentrado al centro y norte del territorio.
-    - Centro: Miguel Hidalgo, Cuauhtémoc, Benito Juárez
+----
 
-- Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa Alta.
+- A simple vista se podría sospechar que el transporte público está concentrado
+al centro y norte del territorio.  
+- Centro: Miguel Hidalgo, Cuauhtémoc, Benito Juárez
+
+- Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena
+Contreras, Xochimilco y Milpa Alta.
+
+- Será porque son de las menos pobladas??
 
 ---
 
-### Distancia promedio al transporte público
+<!-- ### Distancia promedio al transporte público
 
-- `MEAN_DIST`
-- Cómo es que el transporte está distribuido con respecto a la _población_ y dónde vive ésta.
-- Ideas insuficientes
-    - Cantidad de estaciones en total contenidas dentro de los límites de una alcaldía
-    - Número total de estaciones normalizado por área las alcaldías
-- Conectividad: distancia promedio por alcaldía de las zonas residenciales al transporte más cercano.
-- Uso de suelo de la CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda.
-    - Falta Álvaro Obregón, una de las más pobladas
+- `MEAN_DIST` - Cómo es que el transporte está distribuido con respecto a la
+_población_ y dónde vive ésta.  - Ideas insuficientes - Cantidad de estaciones
+en total contenidas dentro de los límites de una alcaldía - Número total de
+estaciones normalizado por área las alcaldías - Conectividad: distancia promedio
+por alcaldía de las zonas residenciales al transporte más cercano.  - Uso de
+suelo de la CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda.  -
+Falta Álvaro Obregón, una de las más pobladas
 
 ---
 
 ### Número total de estaciones & distancia a la zona centro
 
-- Total de estaciones dentro de la alcaldía por año para tomar en cuenta cómo ha evolucionado el sistema de transporte unificado.
-- La distancia a la zona centro se toma como la distancia promedio de las mismas zonas residenciales al zócalo de la ciudad.
-    - Zócalo como punto central puesto que es una de las zonas más antiguas y por lo tanto el crecimiento de la zona metropolitana de la ciudad ha sido radialmente hacia afuera de esta zona. 
-    - Las primeras estaciones de metro y metrobus fueron construidas precisamente para servir a la zona centro.
+- Total de estaciones dentro de la alcaldía por año para tomar en cuenta cómo ha
+evolucionado el sistema de transporte unificado.  - La distancia a la zona
+centro se toma como la distancia promedio de las mismas zonas residenciales al
+zócalo de la ciudad.  - Zócalo como punto central puesto que es una de las zonas
+más antiguas y por lo tanto el crecimiento de la zona metropolitana de la ciudad
+ha sido radialmente hacia afuera de esta zona.  - Las primeras estaciones de
+metro y metrobus fueron construidas precisamente para servir a la zona centro.
 
----
+--- -->
 
 ## Acceso a transporte con base en la población
-
-- Concentración alta de transporte en la zona centro.
-- Sin embargo, las alcaldías del centro **no** son las más pobladas.
 
 ```{R, echo = FALSE}
 info |>
@@ -193,6 +206,10 @@ info |>
       na.value = "gray"
     )
 ```
+
+- Concentración alta de transporte en la zona centro. 
+- Sin embargo, las alcaldías del centro **no** son las más pobladas.
+
 
 ---
 
@@ -229,6 +246,8 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
   )
 ```
 
+----
+
 - Zona centro siempre ha estado bien conectada.
   - Cuauhtémoc, Benito Juárez y Venustiano Carranza tienen las menores varianzas en distancia media y además las más pequeñas.
 - Tláhuac, Cuajimalpa y Milpa Alta son los de mayor distancia y variación.
@@ -238,7 +257,7 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
 
 ### Total de estaciones por alcaldía a través del tiempo
 
-```{R, echo=FALSE}
+```{R, echo=FALSE, out.width = "50%"}
 ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
   geom_boxplot(fill = "#56B1F7") + 
   coord_flip() + 
@@ -249,8 +268,7 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
   )
 ```
 
-- El número de estaciones en las alcadías
-de la zona centro excede vastamente el de las alcaldías más periféricas
+- El número de estaciones en las alcadías de la zona centro excede vastamente el de las alcaldías más periféricas
 - Caso Cuauhtémoc y Benito Juárez: privilegiando a la zona centro.
 
 ---
@@ -267,26 +285,14 @@ info |>
   cor() |> corrplot(method="ellipse", tl.cex=0.75)
 ```
 
+::: notes
 - La correlación de distancia al Zocalo con distancia al transporte más cercano es positiva
 - Correlación negativa entre distancia al zócalo con el número total de estaciones. 
 
 - Correlaciones son aparentemente débiles, pero notables.
+:::
 
----
-
-### Matriz explícita de correlaciones
-
-```{R, echo = FALSE}
-info |>
-  dplyr::select_if(is.numeric) |>
-  dplyr::filter(!is.na(EST_TOTAL)) |>
-  dplyr::filter(!is.na(MEAN_DIST)) |>
-  dplyr::filter(!is.na(ZOC_DIST)) |>
-  #dplyr::select(-POBLACION) |>
-  cor() |> kableFormat()
-```
-
----
+----
 
 ```{R, echo = FALSE}
 info |>
@@ -308,20 +314,18 @@ info |>
     )
 ```
 
-- Correlación visual entre la distancia al transporte más cercano y la distancia al zócalo.
+- Se nota correlación espacial. Más lejos del centro $\implies$ menos transporte
 
 # PCA
 
-```{r, echo=F}
+```{r, include=F}
 df <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df <- subset(df, select=-c(ALCALDIA))
 z <- princomp(df, cor = T)
 summary(z, loadings = TRUE)
 ```
 
----
-
-```{r}
+```{r, echo=F}
 screeplot(z)
 ```
 
@@ -333,9 +337,8 @@ screeplot(z)
   - Distancia promedio a las estaciones
   - Cantidad de estaciones en la alcaldía
 
-## Pruebas de significancia
 
-```{r, echo=F}
+```{r, include=F}
 df2 <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df2 <- df2[df2$AÑO == 2021,]
 rownames(df2) <- df2$ALCALDIA
@@ -343,46 +346,22 @@ rownames(df2) <- df2$ALCALDIA
 df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST))
 ```
 
-- Prueba de esfericidad de Bartlett 
-  - Correlaciones son significativas
+## Gráfico de sedimentación (scree plot)
 
-. . .  
-
-```{R, echo=F}
-bartlett.test(df2)
-```
-
-. . .
-
-- Kaiser--Meyer--Olkin (KMO)
-  - Adecuación medianamente regular
-
-. . .
-
-```{R, echo=F}
-KMO(cor(df2))
-```
-
----
-
-### Gráfico de sedimentación (scree plot)
-
-```{r, echo=F}
-scree(df2) #sugiere de 3 a 6 factores
+```{r, echo=F, out.width="75%"}
+scree(df2) 
 ```
 
 - Un factor es suficiente 
 
----
+----
 
 ```{r, echo=F}
 modelo <- fa(df2, nfactors =1, fm = "ml", rotate = "varimax")
 fa.diagram(modelo)
 ```
 
----
-
-### Índice de conectividad 2021
+## Índice de conectividad 2021
 
 ```{R, include=FALSE}
 indice <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
@@ -394,7 +373,7 @@ indice <- 1 - indice
 ```
 
 ```{R, echo=FALSE}
-kableFormat(indice)
+indice |> kableFormat()
 ```
 
 ---
@@ -412,7 +391,7 @@ indice |>
     )
 ```
 
-. . .
+----
 
 ```{r, echo=F}
 indice |>
@@ -431,7 +410,6 @@ indice |>
     )
 ```
 
----
 
 ## Análisis del índice de conectividad por año
 
@@ -484,7 +462,16 @@ ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
 
 # Regresión lineal
 
-```{R, echo = FALSE}
+Ajustamos el modelo:
+
+\begin{equation}
+\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) + \varepsilon_i,
+\end{equation}
+
+----
+
+Los coeficientes estimados son:
+```{R, echo = FALSE, results="asis"}
 # Juntando con_by_year
 info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
   dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
@@ -511,7 +498,18 @@ coefs <- info_score |>
   )) |>
   dplyr::select(-statistic)
 
-kableFormat(coefs)
+lm <- lm(log(score) ~ log(AÑO) + log(POBLACION), data = info_score)
+
+lm |> stargazer(type="html", align=T, no.space=T, single.row=T, title="Estimación de parámetros para modelo lineal descrito.")
+```
+
+---
+
+Ahora estimamos el modelo segmentado por alcaldía. Presentamos un ejemplo
+
+```{R, echo=F}
+coefs |> dplyr::filter(ALCALDIA %in% c("Milpa Alta", "Gustavo A. Madero")) |>
+  kableFormat()
 ```
 
 # Interpretación, conclusiones, etc...

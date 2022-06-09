@@ -9,6 +9,7 @@ output:
   bookdown::pdf_document2:
     latex_engine: xelatex
     toc: true
+    extra_dependencies: "subfig"
 date: '2022-05-10'
 bibliography: refs.bib
 lang: "es"
@@ -24,6 +25,9 @@ library(sf)    # hacer gráficas informativas de una matriz de correlaciones.
 library(psych)       # funciones relevantes para PCA y FA
 library(FactoMineR)
 library(kableExtra)
+library(lmtest) # Pruebas de diagnóstico regresión lineal
+library(olsrr) # Pruebas para factor inflacionario de varianza
+knitr::knit_hooks$set(crop = knitr::hook_pdfcrop)
 ```
 ```{r, echo = FALSE}
 # Cargamos los datos:
@@ -84,9 +88,12 @@ en distancia a la zona del centro histórico, población, y otros factores.
 # Análisis exploratorio
 
 ```{R, echo=FALSE}
-kableFormat <- function(df) {
-  df |> kableExtra::kable("latex", booktabs = TRUE) %>% 
-    kableExtra::kable_styling(position = "center", latex_options = "hold_position")
+opts <- options(knitr.kable.NA = "")
+kableFormat <- function(df, ls='', ...) {
+  df |>
+  kableExtra::kable("latex", booktabs = TRUE, linesep=ls, digits = 3, ...) |>
+  identity()
+  # kableExtra::kable_styling(position = "center", latex_options = "hold_position")
 }
 ```
 
@@ -103,15 +110,11 @@ son:
 unique(info$ALCALDIA)
 ```
 
-Tenemos información para los siguientes años:
-```{R, echo=FALSE}
-unique(info$AÑO)
-```
+Tenemos información para cada año desde 1969 que es cuando se construye la primera linea del metro hasta 2021 que es cuando se construyen la líneas del cablebus.
 
 Primero que nada, vemos algunas estadísticas de resumen de los datos.
-
 ```{R, echo=FALSE}
-info |> head() |> kableFormat()
+info |> summary() |> kableFormat(caption = "Estadística descriptiva del conjunto de datos.")
 ```
 
 ## Descripción de las variables de interés
@@ -167,7 +170,7 @@ alc <- alc |>
   dplyr::rename(ALCALDIA = nomgeo)
 ```
 
-```{R, mapa-lineas, echo=FALSE}
+```{R, mapa-lineas, echo=FALSE, crop=T}
 mb <- read_sf("data/mb_shp/Metrobus_lineas_rutas_utm14n.shp")
 metro <- read_sf("data/stcmetro_shp/STC_Metro_lineas_utm14n.shp")
 tlig <- read_sf("data/ste_tren_ligero_shp/STE_TrenLigero_linea_utm14n.shp")
@@ -194,7 +197,7 @@ A partir de ahora nos referimos a la "zona centro" como la zona comprendida por
 las alcaldías: Miguel Hidalgo, Cuauhtémoc, Benito Juárez. Es precisamente esta
 zona en la que sospechamos está sobre-concentrado el transporte público.
 
-```{R, mapa-alc, echo=FALSE}
+```{R, mapa-alc, echo=FALSE, crop = T}
 ggplot(data = alc) +
   geom_sf(show.legend=FALSE) +
   geom_sf_label(
@@ -285,7 +288,7 @@ más pobladas, ya que justamente una mayor densidad poblacional justifica mayor
 inversión en el sistema. Con ayuda de la figura [] podemos ver cómo es la
 distribución geográfica de la población en la CDMX.
 
-```{R, echo = FALSE}
+```{R, echo = FALSE, crop = T}
 info |>
   dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
@@ -311,7 +314,7 @@ y ninguna de las tres más pobladas está en la "zona centro".
 En la figura [] vemos las alcaldías coloreadas dependiendo de cuantas estaciones
 de transporte público al año 2021 tienen en total.
 
-```{R, echo = FALSE}
+```{R, echo = FALSE, crop=T}
 info |>
   dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
@@ -352,16 +355,6 @@ permanentemente), la dispersión de los datos nos dice cómo se ha ido reduciend
 esa distancia desde que se creó la primera línea del metro hasta la actualidad.
 
 
-```{R, echo=FALSE}
-ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
-  geom_boxplot(fill = "#56B1F7") + 
-  coord_flip() + 
-  labs(
-    title = "Distancia promedio al transporte más cercano por alcaldía",
-    x = "Año",
-    y = "Distancia al transporte en metros"
-  )
-```
 Podemos ver que las alcaldías de Cuauhtémoc, Benito Juárez y Venustiano Carranza
 tienen las menores varianzas en distancia media y además las más pequeñas. Estas
 alcaldías son precisamente la que definimos como "zona centro" desde el inicio.
@@ -380,18 +373,25 @@ sigue siendo la alcaldía "peor conectada" por distancia.
 
 Otra cosa que podemos observar es que la línea en la caja que marca la media está en todos los caso mucho más cerca del extremo izquierdo de la caja. Lo cual nos quiere decir que los datos están sesgados, y que la mayoría está más cerca del lado de "distancia baja". En otras palabras, la distancia promedio mejoró muy rápidamente, lo cual sugiere que el sistema de transporte unificado evolucionó rápidamente para cubrir gran parte de la zona metropolitana.
 
-```{R, echo=FALSE}
+```{R, echo=FALSE,crop=T }
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
+  geom_boxplot(fill = "#56B1F7") + 
+  coord_flip() + 
+  labs(
+    x = "Año",
+    y = "Distancia al transporte en metros"
+  )
+
 ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
   geom_boxplot(fill = "#56B1F7") + 
   coord_flip() + 
   labs(
-    title = "Total de estaciones por alcaldía a través del tiempo.",
     x = "Año",
     y = "Total de estaciones"
   )
 ```
 
-```{r, echo=F}
+```{r, echo=F, crop=T}
 ggplot(data = info, mapping=aes(x=AÑO, EST_TOTAL, color=ALCALDIA)) +
   geom_line() +
   labs(
@@ -461,7 +461,7 @@ info |>
   dplyr::filter(!is.na(MEAN_DIST)) |>
   dplyr::filter(!is.na(ZOC_DIST)) |>
   #dplyr::select(-POBLACION) |>
-  cor() |> kableFormat()
+  cor() |> kableFormat(caption = "Matriz de correlación entre las variables de interés.")
 ```
 
 Si graficamos la distancia promedio al sistema de transporte por alcaldía la
@@ -476,7 +476,7 @@ cerca de Tacubaya y con el corredor Insurgentes Sur respectivamente. Por otro
 lado, las zonas como Los Dínamos y Las Águilas están muy lejos del resto del
 sistema.
 
-```{R, echo = FALSE}
+```{R, echo = FALSE, crop=T}
 info |>
   dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
@@ -498,7 +498,7 @@ info |>
 
 Ahora vemos cómo evoluciona como función del tiempo.
 
-```{r, echo = F}
+```{r, echo = F, crop=T}
 ggplot(info, mapping=aes(x=AÑO, y=MEAN_DIST, color=ALCALDIA)) +
   geom_line() +
   labs(
@@ -508,12 +508,7 @@ ggplot(info, mapping=aes(x=AÑO, y=MEAN_DIST, color=ALCALDIA)) +
   )
 ```
 
-[Aqui grafica perrona de correlación a través del tiempo.]
-
-```{R}
-```
-
-```{r, echo=FALSE}
+```{r, echo=FALSE, crop=T}
 ggplot(data=info, mapping=aes(x=AÑO, y=POBLACION, color=ALCALDIA)) +
   geom_line() + 
   labs(
@@ -533,17 +528,10 @@ df <- subset(df, select=-c(ALCALDIA))
 
 ```{r, echo=FALSE}
 z <- princomp(df, cor = T)
-summary(z, loadings = TRUE)
+summary(z, loadings = TRUE)$loadings
 screeplot(z)
 ```
 # Construcción de un índice de conectividad
-
-Aquí construimos un índice de conectividad basado en los datos del año 2021. El
-índice lo construimos por medio del análisis factorial. Las variables utilizadas
-serán la distancia promedio a las estaciones y cantidad de estaciones
-en la alcaldía. La prueba de esfericidad de Bartlett indica que las
-correlaciones son significativas y la prueba Kaiser--Meyer--Olkin (KMO) indica
-una adecuación medianamente regular.
 
 ```{R, echo=FALSE}
 df2 <- info[info$ALCALDIA != 'Álvaro Obregón',]
@@ -553,16 +541,20 @@ rownames(df2) <- df2$ALCALDIA
 df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST))
 ```
 
-Las pruebas de Bartlett dice lo siguiente:
 ```{R, echo=FALSE}
-bartlett.test(df2)
+bt <-bartlett.test(df2)
 ```
 
-Por otro lado, KMO dice lo siguiente:
-
 ```{R, echo=FALSE}
-KMO(cor(df2))
+kmotest <- KMO(cor(df2))
 ```
+
+Aquí construimos un índice de conectividad basado en los datos del año 2021. El
+índice lo construimos por medio del análisis factorial. Las variables utilizadas
+serán la distancia promedio a las estaciones y cantidad de estaciones
+en la alcaldía. La prueba de esfericidad de Bartlett indica que las
+correlaciones son significativas ya que aplicarla da un valor-$p$ de `r bt$p.value` y la prueba Kaiser--Meyer--Olkin (KMO) indica
+una adecuación medianamente regular. El valor es de `r kmotest$MSA`, es apenas suficiente para justificar el uso de esta técnica.
 
 El gráfico de sedimentación (scree plot en inglés) indica que un factor es
 suficiente en este caso. 
@@ -570,11 +562,24 @@ suficiente en este caso.
 scree(df2) #sugiere de 3 a 6 factores
 ```
 
-Al ver el modelo generado, vemos que el factor o constructo contrasta la
-población y cantidad de estaciones contra la distancia media a las mismas. Un
-valor muy alto del índice indicaría que tienes mucha población o estaciones,
-mientras que un índice bajo indicaría una valor mucho mayor de la distancia
-respecto a las estaciones y a la población. 
+Queremos combinar la información que dan el número total de estaciones y la
+distancia promedio a ellas para aproximar una variable intangible: qué tan
+conectada está la alcaldía al resto del sistema de transporte público unificado.
+Para esto utilizamos análisis de factores para construir un índice de
+conectividad. En la tabla \ref{fig:fa-output} (en el apéndice
+\ref{sec:fig-omitidas}) se puede encontrar la salida completa de la aplicación
+de esta función al conjunto de datos. El diagrama que explica cómo está
+construido el índice y la participación de cada factor que lo compone se puede
+ver en la figura \ref{fig:diagrama}.
+
+Al ver el modelo generado, vemos que el factor o constructo da importancias
+comparables a la cantidad total de estaciones de transporte en la alcaldía como
+su distancia promedio a ellas. Un valor muy alto del índice indicaría que hay
+muy buen acceso en cuanto a número de estaciones, las cuales están bien
+distribuidas en el territorio lo cual baja la distancia promedio a ellas. Un
+índice bajo indica que no solo no hay muchas o ninguna estación en el
+territorio, las más cercanas en otras alcaldías están relativamente lejos.
+
 ```{r, echo=F}
 modelo <- fa(df2, nfactors =1, fm = "ml", rotate = "varimax")
 print(modelo)
@@ -593,11 +598,11 @@ indice <- 1 - indice
 ```
 
 ```{R, echo=FALSE}
-kableFormat(indice)
+kableFormat(indice, caption = "Índice de conectividad calculado al 2021.")
 ```
 
 
-```{r, echo=F}
+```{r, echo=F, crop=T}
 indice |>
   tibble::rownames_to_column(var = "ALCALDIA") |>
   dplyr::as_tibble() |>
@@ -610,7 +615,7 @@ indice |>
     )
 ```
 
-```{r, echo=F}
+```{r, echo=F, crop=T}
 indice |>
   tibble::rownames_to_column(var = "ALCALDIA") |>
   dplyr::as_tibble() |>
@@ -628,8 +633,17 @@ indice |>
 ```
 
 ## Análisis del índice de conectividad por año
-Queremos ver cómo ha evolucionado el índice de conectividad de las diversas
-alcaldías a medida que ha ido creciendo el sistema de transporte unificado.
+
+El mapa nos ayuda a identificar patrones espaciales, pero para notar patrones
+temporales utilizamos \textit{boxplots}, también conocidas como gráficas de caja
+y bigotes. Lo que ellas nos permiten es ver mediante su largo cómo es que ha
+cambiado la variable a través del tiempo. Por ejemplo un \textit{boxplot} muy
+largo indica mucha variación, o en otras palabras, si nos concentramos en la
+figura \ref{fig:est_tot-v-ano}, en el caso de Cuauhtémoc vemos que su caja es de
+las más largas. De esto inferimos que es donde más se han construido estaciones,
+ya que pasó de tener relativamente pocas a tener la mayor cantidad. Cuajimalpa
+por ejemplo tiene un punto en vez de caja porque en todos los años ha tenido la
+misma cantidad de estaciones: ninguna.
 
 ```{R, echo=F}
 indexiza <- function(df){
@@ -658,23 +672,65 @@ indexiza <- function(df){
 }
 ```
 
-```{R, echo=F}
+```{R, echo=F, crop=T}
 con_by_year <- info |>
   group_by(AÑO) |>
   #dplyr::select(EST_TOTAL, MEAN_DIST, AÑO, ALCALDIA) |>
   group_modify(~ indexiza(.x))
 
 ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
-  geom_line()
+  geom_line() +
+  labs(
+    title = "Score por alcaldía a través del tiempo",
+    x = "Año",
+    y = "score de conectividad"
+  )
 ```
 
 
-```{R, echo=F}
+```{R, echo=F, crop=T}
 ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
   geom_boxplot(fill = "#56B1F7") + 
   coord_flip()
 ```
 
+Otra ventaja de utilizar boxplots para analizar la dinámica es que tanto el
+total de estaciones como la distancia a ellas son funciones monótonas: el número
+de estaciones no se disminuye porque no se destruyen líneas (exceptuando el caso
+extraordinario de la línea dorada) y la distancia promedio a estaciones no
+aumenta por la misma razón. Entonces, el sesgo de los datos nos ayuda a entender
+en qué punto de tiempo se construyeron las estaciones que conllevan a los
+cambios en las variables. Que la línea que indica la media de los datos esté
+sesgada a la izquierda nos indica que en la mayoría de observaciones (es decir
+años), por ejemplo, el total de estaciones ha sido bajo y que este aumentó
+recientemente. Un sesgo a la derecha indica lo contrario: que el número de
+estaciones creció relativamente temprano en esta ventana de tiempo que estamos
+estudiando, y la mayoría de los años desde 1969 a la fecha los ha experimentado
+con esa cantidad alta de estaciones.
+
+En ejemplos concretos, en la figura \ref{fig:dist-v-ano} el extremo sesgo que se
+puede ver en la caja de Cuajimalpa nos indica que su distancia promedio al
+transporte mejoró apenas recientemente, y que en la ventana de tiempo estudiada
+la mayoría del transporte se constuyó lejos de Cuajimalpa. Lo mismo para
+Iztapalapa, que como ya discutimos mejoró mucho gracias a la construcción de la
+línea morada y del cablebus. La linea morada se construyó en 1991 y el cablebus
+en 2021, ambos en la segunda mitad del periodo de tiempo sobre el cual tenemos
+datos.
+
+Para tener mejor idea sobre en que años específicamente se dieron los cambios
+que dieron lugar a los cambios en la conectividad presentamos en la figura
+\ref{fig:idx-v-tiempo} la gráfica del índice de conectividad con respecto al
+tiempo. En ella vemos una vez más los cambios drásticos que ya habíamos
+comentado respecto a Iztapalapa, Milpa Alta y Tláhuac: el extremo oriente de la
+ciudad. Damos crédito a esta mejora dramática en conectividad a la linea morada
+del metro que mejora muchísimo la distancia promedio a la estación de transporte
+más cercana.
+
+Otra cosa interesante que podemos notar es que a pesar de que tanto el número
+total de estaciones como la distancia promedio a ellas son monótonas el índice
+si sube y baja. Esto se debe a que este score de conectividad empeora cuando el
+de otras alcaldías mejora, como se puede ver por ejemplo con Azcapotzalco a
+principios de la década de 1990. 
 
 # Regresión lineal
 
@@ -704,15 +760,90 @@ coefs <- info_score |>
     TRUE ~ "no signif"
   )) |>
   dplyr::select(-statistic)
-
-kableFormat(coefs)
 ```
 
 Para interpretar el papel que juega la población en el incremento de
 conectividad de una alcaldía utilizamos un modelo lineal por sus propiedades de
 interpretación. Estimamos el siguiente modelo:
 \begin{equation}
-\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) + \varepsilon_i 
+\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) + \varepsilon_i,
 \end{equation}
+al conjunto de datos que de todas las alcaldías disponibles salvo Álvaro Obregón
+ya que no se pudo calcular el índice por la falta de datos, ni Cuauhtémoc ni
+Cuajimalpa porque su índice es siempre 1 y 0 respectivamente lo cual causa
+problemas en la estimación.
+
+```{r, echo=F}
+lm <- lm(log(score) ~ log(AÑO) + log(POBLACION), data = info_score)
+```
+
+Para poder utilizar el modelo primero verificamos que se cumplan sus supuestos:
+homocedasticidad, no autocorrelación y rango completo. Para eso usamos las
+pruebas de White, Breusch--Godfrey y el valor inflacionario de la varianza que
+prueban por cada supuesto respectivamente. Los resultados de aplicar dichas
+pruebas se pueden encontrar en la siguiente tabla:
+
+```{r, echo = F}
+wte <- bptest(lm, ~ log(AÑO) * log(POBLACION) + I(log(AÑO)^2) + I(log(POBLACION)^2), data = info_score)
+bgte <- bgtest(lm, order=3)
+vifte <- ols_vif_tol(lm)
+
+dplyr::data_frame(
+  Prueba = c("White", "Breusch--Godfrey", "máx VIF"),
+  valor_p = c(wte$p.value, bgte$p.value, max(vifte$VIF))
+) |> kableFormat()
+```
+
+Para las pruebas de White y Breusch--Godfrey la hipótesis nula es
+homocedasticidad y no autocorrelación respectivamente. El VIF (valor
+inflacionario de la varianza) se usa como regla de decisión, si está por debajo
+de 30 no hay problemas graves de multicolinealidad. Como se puede ver, los
+valores-$p$ son ceros numéricos, por lo que no se rechaza la hipótesis nula y se
+cumplen tanto homocedasticidad como no autocorrelación. Por el otro lado, como
+el valor VIF más grande es apenas mayor a 1, no tenemos ningún problema de
+multicolinealidad. En resumen: se puede aplicar el modelo y usar los resultados
+para dar conclusiones estadísticas.
+
+Los coeficientes estimados son:
+```{R, echo = F, results="asis"}
+lm |> stargazer(align=T, no.space=T, single.row=T, title="Estimación de parámetros para modelo lineal descrito.")
+```
+
+Se puede ver que los coeficientes asociados a cada variable son altamente
+significativos. Tanto el año como la población de una alcaldía se relacionan
+positivamente con su nivel de conectividad, pero el coeficiente asociado al año
+es mucho mayor. Eso nos indica que si el gobierno continúa desarrollando
+transporte público al mismo paso se espera que la conectividad de cada alcaldía
+mejore notablemente, mientras que la población casi no explica el aumento en la
+oferta de transporte público para una alcaldía dada.
+
+Finalmente llevamos a cabo este mismo análisis, pero ajustando este modelo sobre el conjunto de datos restringido a una sola alcaldía para cada alcaldía. La tabla que contiene todos los coeficientes estimados se puede econtrar en los anexos, por ahora solo mencionamos ejemplos notables. Entre estos destacan Milpa Alta y GAM.
+
+```{R, echo=F}
+coefs |> dplyr::filter(ALCALDIA %in% c("Milpa Alta", "Gustavo A. Madero")) |>
+  kableFormat(ls = c("", "", "\\addlinespace"), caption="Coeficientes del modelo estimado para GAM y Milpa Alta.")
+```
+
+Para GAM todos los coeficientes son altamente significativos, y el coeficiente
+asociado a la población es mucho más grande comparado al modelo de todas las
+alcaldías en conjunto. Por el otro lado, para Milpa Alta ningún coeficiente es
+significativo al 10%, lo cual da pistas de que lo que pase en Milpa Alta es de
+poco interés para las autoridades encargadas de planear y construir transporte
+público, lo cual no sorprende dada su baja densidad poblacional.
+
+Usando técnicas se regresión lineal podríamos ajustar este modelo a diferentes
+subconjuntos de datos: las alcaldías del centro y el resto. Asi podríamos
+analizar si los coeficientes son significativamente diferentes. Sin embargo, en
+interés de la brevedad no incluímos este análisis final.
 
 # Interpretación, conclusiones, etc...
+
+# Apéndices
+
+## Coeficientes de la regresión segmentada por alcaldía
+
+A continuación la tabla a la que se hace referencia en la sección de regresión lineal. Contiene los coeficientes estimados para el modelo presentado para cada alcaldía junto con su error estándar, valor-$p$, y si es o no significativa a un nivel de 10%.
+
+```{R, echo = F}
+kableFormat(coefs, ls = c("", "", "\\addlinespace"), caption="Coeficientes estimados por alcaldía con significancia al 10 por ciento.")
+```

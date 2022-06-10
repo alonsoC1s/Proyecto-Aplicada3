@@ -42,9 +42,14 @@ kableFormat <- function(df, ls='', ...) {
 
 # Propuesta del Proyecto
 
-. . .
 
-¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?
+- Pregunta clave: ¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?
+- Buscamos tener una visión histórica de cómo ha ido evolucionando la cobertura del transporte público
+- Análisis exploratorio
+- Análisis de correlación de variables
+- Construcción de índice de conectividad usando análisis factorial
+- Modelo de regresión lineal 
+
 
 # Planteamiento del problema
 
@@ -316,7 +321,7 @@ info |>
 
 - Se nota correlación espacial. Más lejos del centro $\implies$ menos transporte
 
-# PCA
+# Análisis de componentes principales
 
 ```{r, include=F}
 df <- info[info$ALCALDIA != 'Álvaro Obregón',]
@@ -325,10 +330,30 @@ z <- princomp(df, cor = T)
 summary(z, loadings = TRUE)
 ```
 
+## Primera componente
+
+- Las delegaciones más pobladas y con más estaciones tienen menor distancia promedio
+- La población y la cantidad de estaciones han aumentado con el tiempo
+- La distancia al zócalo está asociada con la cantidad de estaciones y el tamaño de la población
+
+## Segunda componente
+
+- Contrasta la población con la distancia al zócalo y el paso del tiempo
+- A mayor distancia del zócalo a través del tiempo menos población
+- Se da una idea de la concentración de la población en el tiempo
+
+## Tercera componente
+
+- Comparación de la distancia al zócalo y la población contra la distancia promedio y la cantidad de estaciones
+- Nuestra hipótesis podría explicar el 20% de la situación
+
+
 ```{r, echo=F}
 screeplot(z)
 ```
 
+- Ninguna componente es verdaderamente dominante
+- La variabilidad se explica bien hasta la cuarta componente con 91% de ella
 
 # Construcción de un índice de conectividad
 
@@ -468,6 +493,11 @@ Ajustamos el modelo:
 \text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) + \varepsilon_i,
 \end{equation}
 
+
+- Tomamos el conjunto de datos de todas las alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y Cuajimalpa
+
+- Verificamos que se cumplan los supuestos del modelo
+
 ----
 
 Los coeficientes estimados son:
@@ -505,6 +535,14 @@ lm |> stargazer(type="html", align=T, no.space=T, single.row=T, title="Estimaci�
 
 ---
 
+- Coeficientes asociados altamente significativos
+- El año y la población de una alcaldía se relacionan positivamente con el nivel de conectividad, con mayor peso en el año
+- Si se continúa desarrollando el transporte público a ese ritmo la conectividad a futuro mejorará notablemente
+- La población casi no explica el aumento en la oferta de transporte para alguna alcaldía
+
+
+----
+
 Ahora estimamos el modelo segmentado por alcaldía. Presentamos un ejemplo
 
 ```{R, echo=F}
@@ -512,4 +550,22 @@ coefs |> dplyr::filter(ALCALDIA %in% c("Milpa Alta", "Gustavo A. Madero")) |>
   kableFormat()
 ```
 
-# Interpretación, conclusiones, etc...
+-----
+
+
+- Para GAM los coeficientes son altamente significativos y el coeficiente asociado a la población es mayor al de las demás alcaldías
+- Para Milpa Alta ningún coeficiente es significativo al 10%. Lo que ocurre en ella no influencia decisiones de constuir nuevo transporte.
+
+# Conclusiones
+
+:::::: nonincremental
+
+- Resultados de dos tipos: la visión "presente" que tenemos de la conectividad del transporte público y la visión "pasada" donde vemos la evolución de esta conectividad
+- Respuesta a la hipótesis pensando en como fueron cambiado los datos
+- Hay una mejora significativa del transporte público con el paso del tiempo
+- Futuro de la conectividad de la ciudad
+- ¿Cuál debería ser el enfoque de una inversión?
+- Explicación e interpretación histórica de porque cambiaron las rutas del transporte en lo que hoy es la CDMX
+- ¿Qué información podría ayudar a mejorar el análisis? 
+
+:::

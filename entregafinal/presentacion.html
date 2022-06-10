@@ -468,10 +468,18 @@ en la <span class="smallcaps">cdmx</span></h1>
 
 <section id="propuesta-del-proyecto" class="title-slide slide level1">
 <h1>Propuesta del Proyecto</h1>
-<div class="fragment">
-<p>¿Está bien distribuido el sistema de transporte público para servir a
-las necesidades de la población de la ciudad?</p>
-</div>
+<ul>
+<li class="fragment">Pregunta clave: ¿Está bien distribuido el sistema
+de transporte público para servir a las necesidades de la población de
+la ciudad?</li>
+<li class="fragment">Buscamos tener una visión histórica de cómo ha ido
+evolucionando la cobertura del transporte público</li>
+<li class="fragment">Análisis exploratorio</li>
+<li class="fragment">Análisis de correlación de variables</li>
+<li class="fragment">Construcción de índice de conectividad usando
+análisis factorial</li>
+<li class="fragment">Modelo de regresión lineal</li>
+</ul>
 </section>
 
 <section>
@@ -977,11 +985,49 @@ total de estaciones.</p></li>
 <span class="math inline">\(\implies\)</span> menos transporte</li>
 </ul>
 </section></section>
-<section id="pca" class="title-slide slide level1">
-<h1>PCA</h1>
-<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
-</section>
+<section>
+<section id="análisis-de-componentes-principales"
+class="title-slide slide level1">
+<h1>Análisis de componentes principales</h1>
 
+</section>
+<section id="primera-componente" class="slide level2">
+<h2>Primera componente</h2>
+<ul>
+<li class="fragment">Las delegaciones más pobladas y con más estaciones
+tienen menor distancia promedio</li>
+<li class="fragment">La población y la cantidad de estaciones han
+aumentado con el tiempo</li>
+<li class="fragment">La distancia al zócalo está asociada con la
+cantidad de estaciones y el tamaño de la población</li>
+</ul>
+</section>
+<section id="segunda-componente" class="slide level2">
+<h2>Segunda componente</h2>
+<ul>
+<li class="fragment">Contrasta la población con la distancia al zócalo y
+el paso del tiempo</li>
+<li class="fragment">A mayor distancia del zócalo a través del tiempo
+menos población</li>
+<li class="fragment">Se da una idea de la concentración de la población
+en el tiempo</li>
+</ul>
+</section>
+<section id="tercera-componente" class="slide level2">
+<h2>Tercera componente</h2>
+<ul>
+<li class="fragment">Comparación de la distancia al zócalo y la
+población contra la distancia promedio y la cantidad de estaciones</li>
+<li class="fragment">Nuestra hipótesis podría explicar el 20% de la
+situación</li>
+</ul>
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
+<ul>
+<li class="fragment">Ninguna componente es verdaderamente dominante</li>
+<li class="fragment">La variabilidad se explica bien hasta la cuarta
+componente con 91% de ella</li>
+</ul>
+</section></section>
 <section>
 <section id="construcción-de-un-índice-de-conectividad"
 class="title-slide slide level1">
@@ -1172,6 +1218,13 @@ transporte unificado?</li>
 \text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) +
 \varepsilon_i,
 \end{equation}\]</span></p>
+<ul>
+<li class="fragment"><p>Tomamos el conjunto de datos de todas las
+alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y
+Cuajimalpa</p></li>
+<li class="fragment"><p>Verificamos que se cumplan los supuestos del
+modelo</p></li>
+</ul>
 </section>
 <section class="slide level2">
 
@@ -1290,6 +1343,20 @@ F Statistic
 </td>
 </tr>
 </table>
+</section>
+<section class="slide level2">
+
+<ul>
+<li class="fragment">Coeficientes asociados altamente
+significativos</li>
+<li class="fragment">El año y la población de una alcaldía se relacionan
+positivamente con el nivel de conectividad, con mayor peso en el
+año</li>
+<li class="fragment">Si se continúa desarrollando el transporte público
+a ese ritmo la conectividad a futuro mejorará notablemente</li>
+<li class="fragment">La población casi no explica el aumento en la
+oferta de transporte para alguna alcaldía</li>
+</ul>
 </section>
 <section class="slide level2">
 
@@ -1441,11 +1508,36 @@ no signif
 </tr>
 </tbody>
 </table>
-</section></section>
-<section id="interpretación-conclusiones-etc"
-class="title-slide slide level1">
-<h1>Interpretación, conclusiones, etc…</h1>
+</section>
+<section class="slide level2">
 
+<ul>
+<li class="fragment">Para GAM los coeficientes son altamente
+significativos y el coeficiente asociado a la población es mayor al de
+las demás alcaldías</li>
+<li class="fragment">Para Milpa Alta ningún coeficiente es significativo
+al 10%. Lo que ocurre en ella no influencia decisiones de constuir nuevo
+transporte.</li>
+</ul>
+</section></section>
+<section id="conclusiones" class="title-slide slide level1">
+<h1>Conclusiones</h1>
+<div>
+<ul>
+<li>Resultados de dos tipos: la visión “presente” que tenemos de la
+conectividad del transporte público y la visión “pasada” donde vemos la
+evolución de esta conectividad</li>
+<li>Respuesta a la hipótesis pensando en como fueron cambiado los
+datos</li>
+<li>Hay una mejora significativa del transporte público con el paso del
+tiempo</li>
+<li>Futuro de la conectividad de la ciudad</li>
+<li>¿Cuál debería ser el enfoque de una inversión?</li>
+<li>Explicación e interpretación histórica de porque cambiaron las rutas
+del transporte en lo que hoy es la CDMX</li>
+<li>¿Qué información podría ayudar a mejorar el análisis?</li>
+</ul>
+</div>
 </section>
     </div>
   </div>

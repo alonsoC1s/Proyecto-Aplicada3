@@ -1,0 +1,578 @@
+---
+title: "Presentación Estadística Aplicada III"
+author:
+- Alonso Martinez Cisneros
+- Juan Carlos Sigler Priego
+- Carlos Delgado
+- Esmeralda Altamirano
+output:
+  revealjs::revealjs_presentation:
+    incremental: true
+    theme: solarized
+date: '2022-06-06'
+bibliography: refs.bib
+lang: "es"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = F, message = F, fig.align = "center")
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+library(stargazer)
+library(sf)    # hacer gráficas informativas de una matriz de correlaciones.
+library(psych)       # funciones relevantes para PCA y FA
+library(FactoMineR) 
+```
+```{r, echo = FALSE}
+# Cargamos los datos:
+info <- read.csv('data/datosfinales.csv')
+```
+
+```{R, echo=FALSE}
+kableFormat <- function(df) {
+  df |> kableExtra::kable("html", booktabs = TRUE) %>% 
+    kableExtra::kable_styling(position = "center", latex_options = "hold_position")
+}
+```
+
+# Propuesta del Proyecto
+
+# Planteamiento del problema
+
+- Transporte público en la Ciudad de México.
+- `r info |> dplyr::filter(AÑO == 2021) |> summarize(sum(POBLACION)) |> as.numeric() |> format(big.mark=",")` habitantes
+- ¿Bien planeado y accesible?
+
+## Objetivos
+
+- Cuantificar el nivel de acceso de la población de distintas alcaldías a los diversios medios de transporte público:
+    - Metro
+    - Metrobus
+    - Tren Ligero
+    - Cablebus
+
+- Determinar que tan bien distribuido está el transporte público en la ciudad
+
+## Hipótesis
+
+- El transporte público está muy centralizado en la zona del centro histórico.
+    - Benito Juárez, Cuauhtémoc son zonas privilegiadas.
+
+# Propuesta de proyecto
+
+- Pregunta clave: ¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?
+- Buscamos tener una visión histórica de cómo ha ido evolucionando la cobertura del transporte público
+- Análisis exploratorio
+- Análisis de correlación de variables
+- Construcción de índice de conectividad usando análisis factorial
+- Modelo de regresión lineal 
+
+# Análisis exploratorio
+
+- Hay `r length(unique(info$ALCALDIA))` alcaldías. 
+- Años: 1969-2021
+
+. . .
+
+```{R, echo=FALSE}
+info |> head() |> kableFormat()
+```
+
+---
+
+```{R, echo=F}
+summary(info) |> kableFormat()
+```
+
+## Descripción de las variables de interés
+
+- `AÑO`
+- `ALCALDIA`
+- `POBLACIÓN`
+- `MEAN_DIST`
+- `EST_TOTAL`
+- `ZOC_DIST`
+
+
+## Construcción de la base de datos
+
+### Número total de estaciones por delegación
+
+```{R, echo=FALSE}
+alc <- read_sf("data/alcaldias_cdmx/alcaldías_cdmx/alcaldias_cdmx.shp")
+
+alc <- alc |>
+  dplyr::mutate(nomgeo = case_when(
+    nomgeo == "MILPA ALTA" ~ "Milpa Alta",
+    nomgeo == "BENITO JUÁREZ" ~ "Benito Juárez",
+    nomgeo == "GUSTAVO A. MADERO" ~ "Gustavo A. Madero",
+    nomgeo == "COYOACÁN" ~ "Coyoacán",
+    nomgeo == "MIGUEL HIDALGO" ~ "Miguel Hidalgo",
+    nomgeo == "LA MAGDALENA CONTRERAS" ~ "Magdalena Contreras",
+    nomgeo == "TLÁHUAC" ~ "Tláhuac",
+    nomgeo == "AZCAPOTZALCO" ~ "Azcapotzalco",
+    nomgeo == "IZTACALCO" ~ "Iztacalco", 
+    nomgeo == "ÁLVARO OBREGÓN" ~ "Álvaro Obregón",
+    nomgeo == "XOCHIMILCO" ~ "Xochimilco",
+    nomgeo == "VENUSTIANO CARRANZA" ~ "Venustiano Carranza",
+    nomgeo == "TLALPAN" ~ "Tlalpan",
+    nomgeo == "CUAJIMALPA DE MORELOS" ~ "Cuajimalpa",
+    nomgeo == "CUAUHTÉMOC" ~ "Cuauhtémoc", 
+    nomgeo == "IZTAPALAPA" ~ "Iztapalapa"
+  )) |>
+  dplyr::rename(ALCALDIA = nomgeo)
+```
+
+```{R, mapa-lineas, echo=FALSE}
+mb <- read_sf("data/mb_shp/Metrobus_lineas_rutas_utm14n.shp")
+metro <- read_sf("data/stcmetro_shp/STC_Metro_lineas_utm14n.shp")
+tlig <- read_sf("data/ste_tren_ligero_shp/STE_TrenLigero_linea_utm14n.shp")
+cbus <- read_sf("data/ste_cablebus_shp/STE_Cablebus_lineas_utm14n.shp")
+
+ggplot(mapping = aes(color = SISTEMA)) +
+  geom_sf(data = alc, color="gray") +
+  geom_sf(data = mb) +
+  geom_sf(data = metro) +
+  geom_sf(data = tlig) +
+  geom_sf(data = cbus) +
+  labs(
+    title = "Lineas del Servicio de Transporte Unificado",
+  )
+```
+
+---
+
+```{R, mapa-alc, echo=FALSE}
+ggplot(data = alc) +
+  geom_sf(show.legend=FALSE) +
+  geom_sf_label(
+    aes(label = ALCALDIA)
+  )
+```
+
+- A simple vista se podría sospechar que el transporte público está concentrado al centro y norte del territorio.
+    - Centro: Miguel Hidalgo, Cuauhtémoc, Benito Juárez
+
+- Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa Alta.
+
+---
+
+### Distancia promedio al transporte público
+
+- `MEAN_DIST`
+- Cómo es que el transporte está distribuido con respecto a la _población_ y dónde vive ésta.
+- Ideas insuficientes
+    - Cantidad de estaciones en total contenidas dentro de los límites de una alcaldía
+    - Número total de estaciones normalizado por área las alcaldías
+- Conectividad: distancia promedio por alcaldía de las zonas residenciales al transporte más cercano.
+- Uso de suelo de la CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda.
+    - Falta Álvaro Obregón, una de las más pobladas
+
+---
+
+### Número total de estaciones & distancia a la zona centro
+
+- Total de estaciones dentro de la alcaldía por año para tomar en cuenta cómo ha evolucionado el sistema de transporte unificado.
+- La distancia a la zona centro se toma como la distancia promedio de las mismas zonas residenciales al zócalo de la ciudad.
+    - Zócalo como punto central puesto que es una de las zonas más antiguas y por lo tanto el crecimiento de la zona metropolitana de la ciudad ha sido radialmente hacia afuera de esta zona. 
+    - Las primeras estaciones de metro y metrobus fueron construidas precisamente para servir a la zona centro.
+
+---
+
+## Acceso a transporte con base en la población
+
+- Concentración alta de transporte en la zona centro.
+- Sin embargo, las alcaldías del centro **no** son las más pobladas.
+
+```{R, echo = FALSE}
+info |>
+  dplyr::filter(AÑO == 2021) |>
+  group_by(ALCALDIA) |>
+  dplyr::select(ALCALDIA, POBLACION) |>
+  dplyr::right_join(alc, by="ALCALDIA") |>
+  ggplot(aes(fill=POBLACION, geometry=geometry)) +
+    geom_sf() +
+    labs(
+      title = "Alcaldías coloreadas por población al 2021"
+    ) +
+    scale_fill_gradient(
+      name = "Población",
+      trans = "log",
+      na.value = "gray"
+    )
+```
+
+---
+
+```{R, echo = FALSE}
+info |>
+  dplyr::filter(AÑO == 2021) |>
+  group_by(ALCALDIA) |>
+  dplyr::select(ALCALDIA, EST_TOTAL) |>
+  dplyr::right_join(alc, by="ALCALDIA") |>
+  ggplot(aes(fill=EST_TOTAL, geometry=geometry)) +
+    geom_sf() + 
+    labs(
+      title = "Total de estaciones por alcaldía."
+    ) +
+    scale_fill_gradient(
+      name = "Total de estaciones",
+      trans = "log",
+      na.value = "gray"
+    )
+```
+
+---
+
+### Evolución de la conectividad como función del tiempo
+
+```{R, echo=FALSE}
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
+  geom_boxplot(fill = "#56B1F7") + 
+  coord_flip() + 
+  labs(
+    title = "Distancia promedio al transporte más cercano por alcaldía",
+    x = "Año",
+    y = "Distancia al transporte en metros"
+  )
+```
+
+- Zona centro siempre ha estado bien conectada.
+  - Cuauhtémoc, Benito Juárez y Venustiano Carranza tienen las menores varianzas en distancia media y además las más pequeñas.
+- Tláhuac, Cuajimalpa y Milpa Alta son los de mayor distancia y variación.
+- Sesgo a la izquierda: el sistema evolucionó rápidamente para cubrir gran parte de la zona metropolitana.
+
+---
+
+### Total de estaciones por alcaldía a través del tiempo
+
+```{R, echo=FALSE}
+ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
+  geom_boxplot(fill = "#56B1F7") + 
+  coord_flip() + 
+  labs(
+    title = "Total de estaciones por alcaldía a través del tiempo.",
+    x = "Año",
+    y = "Total de estaciones"
+  )
+```
+
+- El número de estaciones en las alcadías
+de la zona centro excede vastamente el de las alcaldías más periféricas
+- Caso Cuauhtémoc y Benito Juárez: privilegiando a la zona centro.
+
+---
+
+### Análisis de Correlación
+
+```{R, echo=FALSE}
+info |>
+  dplyr::select_if(is.numeric) |>
+  dplyr::filter(!is.na(EST_TOTAL)) |>
+  dplyr::filter(!is.na(MEAN_DIST)) |>
+  dplyr::filter(!is.na(ZOC_DIST)) |>
+  #dplyr::select(-POBLACION) |>
+  cor() |> corrplot(method="ellipse", tl.cex=0.75)
+```
+
+- La correlación de distancia al Zocalo con distancia al transporte más cercano es positiva
+- Correlación negativa entre distancia al zócalo con el número total de estaciones. 
+
+- Correlaciones son aparentemente débiles, pero notables.
+
+---
+
+### Matriz explícita de correlaciones
+
+```{R, echo = FALSE}
+info |>
+  dplyr::select_if(is.numeric) |>
+  dplyr::filter(!is.na(EST_TOTAL)) |>
+  dplyr::filter(!is.na(MEAN_DIST)) |>
+  dplyr::filter(!is.na(ZOC_DIST)) |>
+  #dplyr::select(-POBLACION) |>
+  cor() |> kableFormat()
+```
+
+---
+
+```{R, echo = FALSE}
+info |>
+  dplyr::filter(AÑO == 2021) |>
+  group_by(ALCALDIA) |>
+  dplyr::select(ALCALDIA, MEAN_DIST) |>
+  dplyr::right_join(alc, by="ALCALDIA") |>
+  ggplot(aes(fill = MEAN_DIST, geometry = geometry)) +
+    geom_sf() +
+    labs(
+      title = "Distancia promedio al transporte más cercano",
+    ) +
+    scale_fill_gradient(
+      name = "Distancia en metros",
+      trans = "log",
+      high = "#132B43",
+      low = "#56B1F7",
+      na.value = "gray"
+    )
+```
+
+- Correlación visual entre la distancia al transporte más cercano y la distancia al zócalo.
+
+# PCA
+
+```{r, echo=F}
+df <- info[info$ALCALDIA != 'Álvaro Obregón',]
+df <- subset(df, select=-c(ALCALDIA))
+z <- princomp(df, cor = T)
+summary(z, loadings = TRUE)
+```
+
+- Ninguna componente es verdaderamente dominante
+- La variabilidad se explica bien hasta la cuarta componente con 91% de ella
+
+## Primera componente
+
+- Las delegaciones más pobladas y con más estaciones tienen menor distancia promedio
+- La población y la cantidad de estaciones han aumentado con el tiempo
+- La distancia al zócalo está asociada con la cantidad de estaciones y el tamaño de la población
+
+## Segunda componente
+
+- Contrasta la población con la distancia al zócalo y el paso del tiempo
+- A mayor distancia del zócalo a través del tiempo menos población
+- Se da una idea de la concentración de la población en el tiempo
+
+## Tercera componente
+
+- Comparación de la distancia al zócalo y la población contra la distancia promedio y la cantidad de estaciones
+- Nuestra hipótesis podría explicar el 20% de la situación
+
+---
+
+```{r}
+screeplot(z)
+```
+
+
+# Construcción de un índice de conectividad
+
+- Año: 2021
+- Análisis factorial
+  - Distancia promedio a las estaciones
+  - Cantidad de estaciones en la alcaldía
+
+## Pruebas de significancia
+
+```{r, echo=F}
+df2 <- info[info$ALCALDIA != 'Álvaro Obregón',]
+df2 <- df2[df2$AÑO == 2021,]
+rownames(df2) <- df2$ALCALDIA
+# df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST, POBLACION))
+df2 <- subset(df2, select=c(EST_TOTAL, MEAN_DIST))
+```
+
+- Prueba de esfericidad de Bartlett 
+  - Correlaciones son significativas
+
+. . .  
+
+```{R, echo=F}
+bartlett.test(df2)
+```
+
+. . .
+
+- Kaiser--Meyer--Olkin (KMO)
+  - Adecuación medianamente regular
+
+. . .
+
+```{R, echo=F}
+KMO(cor(df2))
+```
+
+---
+
+### Gráfico de sedimentación (scree plot)
+
+```{r, echo=F}
+scree(df2) #sugiere de 3 a 6 factores
+```
+
+- Un factor es suficiente 
+
+---
+
+```{r, echo=F}
+modelo <- fa(df2, nfactors =1, fm = "ml", rotate = "varimax")
+fa.diagram(modelo)
+```
+
+---
+
+### Índice de conectividad 2021
+
+```{R, include=FALSE}
+indice <- apply(modelo$scores, 2, function(x) (x-min(x))/(max(x)-min(x)))
+indice <- data.frame(indice, rango = apply(indice, 1, sum))
+indice[order(indice$rango, decreasing = T),]
+indice <- indice[order(indice$ML1, decreasing = F),]
+indice <- subset(indice, select=-c(rango))
+indice <- 1 - indice
+```
+
+```{R, echo=FALSE}
+kableFormat(indice)
+```
+
+---
+
+```{R, echo=F}
+indice |>
+  tibble::rownames_to_column(var = "ALCALDIA") |>
+  dplyr::as_tibble() |>
+  ggplot(mapping=aes(x = ML1, y = ALCALDIA)) +
+    geom_col(fill="gray") +
+    labs(
+      x = "Índice de conectividad",
+      y = "Alcaldía",
+      title = "Índice de conectividad por alcaldía al 2021"
+    )
+```
+
+. . .
+
+```{r, echo=F}
+indice |>
+  tibble::rownames_to_column(var = "ALCALDIA") |>
+  dplyr::as_tibble() |>
+  dplyr::right_join(alc, by = "ALCALDIA") |>
+  ggplot(aes(fill = ML1, geometry = geometry)) +
+    geom_sf() +
+    labs(
+      title = "Alcaldías por conectividad al 2021",
+    ) +
+    scale_fill_gradient(
+      name = "Conectividad",
+      trans = "exp",
+      na.value = "gray"
+    )
+```
+
+---
+
+## Análisis del índice de conectividad por año
+
+- ¿Cómo ha evolucionado el índice de conectividad de las diversas alcaldías a medida que ha ido creciendo el sistema de transporte unificado?
+
+```{R, echo=F}
+indexiza <- function(df){
+  modelo <- df |>
+    dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
+    tibble::column_to_rownames("ALCALDIA") |>
+    dplyr::select(EST_TOTAL, MEAN_DIST) |>
+    fa(nfactors = 1, fm = "ml", rotate = "varimax")
+
+  indice <- modelo$scores |>
+    data.frame() |>
+    tibble::rownames_to_column(var = "ALCALDIA") |>
+    as_tibble() |>
+    dplyr::mutate(score = (ML1 - min(ML1))/(max(ML1)-min(ML1)))
+
+  min_alc <- dplyr::filter(indice, score == min(score))$ALCALDIA[1]
+  cua <- "Cuauhtémoc"
+
+  # Marranada porque a veces se "voltea" el orden
+  if (min_alc == cua) {
+    indice <- dplyr::mutate(indice, score = 1 - score)
+    return(indice)
+  }
+
+  return(indice)
+}
+```
+
+```{R, echo=F}
+con_by_year <- info |>
+  group_by(AÑO) |>
+  #dplyr::select(EST_TOTAL, MEAN_DIST, AÑO, ALCALDIA) |>
+  group_modify(~ indexiza(.x))
+
+ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
+  geom_line()
+```
+
+---
+
+```{R, echo=F}
+ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
+  geom_boxplot(fill = "#56B1F7") + 
+  coord_flip()
+```
+
+# Regresión lineal
+
+- Estimamos el siguiente modelo:
+
+- Tomamos el conjunto de datos de todas las alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y Cuajimalpa
+- Verificamos que se cumpla homocedasticidad, no autocorrelación y rango completo
+
+## Pruebas de White, Breusch-Godfrey y VIF (valor inflacionario de la varianza)
+
+- Para las pruebas de White y Breusch-Godfrey ka hipótesis nula es homocedasticidad y no autocorrelación, respectivamente
+- Los valores-p son ceros numéricos entonces no se rechaza la hipótesis nula y, se cumplen homocedasticidad y no autocorrelación
+- El valor VIF más grande es 1, entonces al estar debajo de 30, no tenemos problemas de multicolinealidad
+
+```{R, echo = FALSE}
+# Juntando con_by_year
+info_score <- dplyr::left_join(info, con_by_year, by=c("ALCALDIA", "AÑO")) |>
+  dplyr::filter(ALCALDIA != "Álvaro Obregón") |>
+  dplyr::filter(ALCALDIA != "Cuauhtémoc") |>
+  dplyr::filter(ALCALDIA != "Cuajimalpa") |>
+  # Población de unidades a miles
+  dplyr::mutate(
+    POBLACION = POBLACION / 1000,
+    # Distancia al zócalo de metros a kilómetros
+    MEAN_DIST = MEAN_DIST / 1000,
+    # Moviendo el score de 0,1 a 1,2 por div entre 0
+    score = score + 1,
+    ALCALDIA = as.factor(ALCALDIA)
+  ) 
+
+coefs <- info_score |>
+  group_by(ALCALDIA) |>
+  group_modify(~
+      lm(log(score) ~ log(AÑO) + log(POBLACION), data = .x) |> broom::tidy()
+    ) |>
+  dplyr::mutate(is.signif = case_when(
+    p.value <= 0.1 ~ "signif",
+    TRUE ~ "no signif"
+  )) |>
+  dplyr::select(-statistic)
+
+kableFormat(coefs)
+```
+
+## Coeficientes
+
+- Coeficientes asociados altamente significativos
+- El año y la población de una alcaldía se relacionan positivamente con el nivel de conectividad, con mayor peso en el año
+- Si se continúa desarrollando el transporte público a ese ritmo la conectividad a futuro mejorará notablemente
+- La población casi no explica el aumento en la oferta de transporte para alguna alcaldía
+
+## Análisis aplicado por alcaldía
+
+- Para GAM los coeficientes son altamente significativos y el coeficiente asociado a la población es mayor al de las demás alcaldías
+- Para Milpa Alta ningún coeficiente es significativo al 10%, entonces podría ser de poco interés para contruir transporte
+
+
+# Interpretación, conclusiones, etc...
+
+- Resultados de dos tipos: la visión "presente" que tenemos de la conectividad del transporte público y la visión "pasada" donde vemos la evolución de esta conectividad
+- Respuesta a la hipótesis pensando en como fueron cambiado los datos
+- Hay una mejora significativa del transporte público con el paso del tiempo
+- Futuro de la conectividad de la ciudad
+- ¿Cuál debería ser el enfoque de una inversión?
+- Explicación e interpretación histórica de porque cambiaron las rutas del transporte en lo que hoy es la CDMX
+- ¿Qué información podría ayudar a mejorar el análisis? 

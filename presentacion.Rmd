@@ -333,12 +333,16 @@ info |>
 
 # Análisis de componentes principales
 
-```{r, include=F}
+```{r, echo=F}
 df <- info[info$ALCALDIA != 'Álvaro Obregón',]
 df <- subset(df, select=-c(ALCALDIA))
 z <- princomp(df, cor = T)
 summary(z, loadings = TRUE)
 ```
+
+----
+
+![](presentacion_files/figure-revealjs/biplot.png)
 
 ## Primera componente
 

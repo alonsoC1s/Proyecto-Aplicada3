@@ -457,8 +457,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
     <div class="slides">
 
 <section>
-    <h1 class="title">Explorando la distribución del transporte público
-en la <span class="smallcaps">cdmx</span></h1>
+    <h1 class="title">Explorando la distribución del transporte público en la <span class="smallcaps">cdmx</span></h1>
     <h2 class="author">Alonso Martinez Cisneros</h2>
     <h2 class="author">Juan Carlos Sigler Priego</h2>
     <h2 class="author">Carlos Delgado</h2>
@@ -469,22 +468,17 @@ en la <span class="smallcaps">cdmx</span></h1>
 <section id="propuesta-del-proyecto" class="title-slide slide level1">
 <h1>Propuesta del Proyecto</h1>
 <ul>
-<li class="fragment">Pregunta clave: <em>¿Está bien distribuido el
-sistema de transporte público para servir a las necesidades de la
-población de la ciudad?</em></li>
-<li class="fragment">Buscamos tener una visión histórica de cómo ha ido
-evolucionando la cobertura del transporte público</li>
+<li class="fragment">Pregunta clave: <em>¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?</em></li>
+<li class="fragment">Buscamos tener una visión histórica de cómo ha ido evolucionando la cobertura del transporte público</li>
 <li class="fragment">Análisis exploratorio</li>
 <li class="fragment">Análisis de correlación de variables</li>
-<li class="fragment">Construcción de índice de conectividad usando
-análisis factorial</li>
+<li class="fragment">Construcción de índice de conectividad usando análisis factorial</li>
 <li class="fragment">Modelo de regresión lineal</li>
 </ul>
 </section>
 
 <section>
-<section id="planteamiento-del-problema"
-class="title-slide slide level1">
+<section id="planteamiento-del-problema" class="title-slide slide level1">
 <h1>Planteamiento del problema</h1>
 <ul>
 <li class="fragment">Transporte público en la Ciudad de México.</li>
@@ -495,26 +489,22 @@ class="title-slide slide level1">
 <section id="objetivos" class="slide level2">
 <h2>Objetivos</h2>
 <ul>
-<li class="fragment">Cuantificar el nivel de acceso de la población de
-distintas alcaldías a los diversios medios de transporte público:
+<li class="fragment">Cuantificar el nivel de acceso de la población de distintas alcaldías a los diversios medios de transporte público:
 <ul>
 <li class="fragment">Metro</li>
 <li class="fragment">Metrobus</li>
 <li class="fragment">Tren Ligero</li>
 <li class="fragment">Cablebus</li>
 </ul></li>
-<li class="fragment">Determinar que tan bien distribuido está el
-transporte público en la ciudad</li>
+<li class="fragment">Determinar que tan bien distribuido está el transporte público en la ciudad</li>
 </ul>
 </section>
 <section id="hipótesis" class="slide level2">
 <h2>Hipótesis</h2>
 <ul>
-<li class="fragment">El transporte público está muy centralizado en la
-zona del centro histórico.
+<li class="fragment">El transporte público está muy centralizado en la zona del centro histórico.
 <ul>
-<li class="fragment">Benito Juárez, Cuauhtémoc son zonas
-privilegiadas.</li>
+<li class="fragment">Benito Juárez, Cuauhtémoc son zonas privilegiadas.</li>
 </ul></li>
 </ul>
 </section></section>
@@ -852,8 +842,7 @@ NA’s :53
 </tbody>
 </table>
 </section>
-<section id="descripción-de-las-variables-de-interés"
-class="slide level2">
+<section id="descripción-de-las-variables-de-interés" class="slide level2">
 <h2>Descripción de las variables de interés</h2>
 <ul>
 <li class="fragment"><code>AÑO</code></li>
@@ -871,8 +860,7 @@ class="slide level2">
 </section>
 <section id="construcción-de-la-base-de-datos" class="slide level2">
 <h2>Construcción de la base de datos</h2>
-<h3 id="número-total-de-estaciones-por-alcaldía">Número total de
-estaciones por alcaldía</h3>
+<h3 id="número-total-de-estaciones-por-alcaldía">Número total de estaciones por alcaldía</h3>
 <p><img src="presentacion_files/figure-revealjs/mapa-lineas-1.png" width="768" style="display: block; margin: auto;" /></p>
 </section>
 <section class="slide level2">
@@ -882,15 +870,10 @@ estaciones por alcaldía</h3>
 <section class="slide level2">
 
 <ul>
-<li class="fragment"><p>A simple vista se podría sospechar que el
-transporte público está concentrado al centro y norte del
-territorio.<br />
+<li class="fragment"><p>A simple vista se podría sospechar que el transporte público está concentrado al centro y norte del territorio.<br />
 </p></li>
-<li class="fragment"><p>Centro: Miguel Hidalgo, Cuauhtémoc, Benito
-Juárez</p></li>
-<li class="fragment"><p>Las carencias más grandes se pueden ver en las
-alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa
-Alta.</p></li>
+<li class="fragment"><p>Centro: Miguel Hidalgo, Cuauhtémoc, Benito Juárez</p></li>
+<li class="fragment"><p>Las carencias más grandes se pueden ver en las alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa Alta.</p></li>
 <li class="fragment"><p>Será porque son de las menos pobladas??</p></li>
 </ul>
 <!-- ### Distancia promedio al transporte público
@@ -917,8 +900,7 @@ metro y metrobus fueron construidas precisamente para servir a la zona centro.
 
 --- -->
 </section>
-<section id="acceso-a-transporte-con-base-en-la-población"
-class="slide level2">
+<section id="acceso-a-transporte-con-base-en-la-población" class="slide level2">
 <h2>Acceso a transporte con base en la población</h2>
 <p><img data-src="presentacion_files/figure-revealjs/mapapob.gif" /></p>
 </section>
@@ -926,14 +908,11 @@ class="slide level2">
 
 <p><img data-src="presentacion_files/figure-revealjs/mapaest.gif" /></p>
 <ul>
-<li class="fragment">Concentración alta de transporte en la zona
-centro</li>
-<li class="fragment">Sin embargo, las alcaldías del centro
-<strong>no</strong> son las más pobladas</li>
+<li class="fragment">Concentración alta de transporte en la zona centro</li>
+<li class="fragment">Sin embargo, las alcaldías del centro <strong>no</strong> son las más pobladas</li>
 </ul>
 </section>
-<section id="evolución-de-la-conectividad-como-función-del-tiempo"
-class="slide level2">
+<section id="evolución-de-la-conectividad-como-función-del-tiempo" class="slide level2">
 <h2>Evolución de la conectividad como función del tiempo</h2>
 <p><img src="presentacion_files/figure-revealjs/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;" /></p>
 </section>
@@ -942,25 +921,18 @@ class="slide level2">
 <ul>
 <li class="fragment">Zona centro siempre ha estado bien conectada.
 <ul>
-<li class="fragment">Cuauhtémoc, Benito Juárez y Venustiano Carranza
-tienen las menores varianzas en distancia media y además las más
-pequeñas.</li>
+<li class="fragment">Cuauhtémoc, Benito Juárez y Venustiano Carranza tienen las menores varianzas en distancia media y además las más pequeñas.</li>
 </ul></li>
-<li class="fragment">Tláhuac, Cuajimalpa y Milpa Alta son los de mayor
-distancia y variación.</li>
-<li class="fragment">Sesgo a la izquierda: el sistema evolucionó
-rápidamente para cubrir gran parte de la zona metropolitana.</li>
+<li class="fragment">Tláhuac, Cuajimalpa y Milpa Alta son los de mayor distancia y variación.</li>
+<li class="fragment">Sesgo a la izquierda: el sistema evolucionó rápidamente para cubrir gran parte de la zona metropolitana.</li>
 </ul>
 </section>
-<section id="total-de-estaciones-por-alcaldía-a-través-del-tiempo"
-class="slide level2">
+<section id="total-de-estaciones-por-alcaldía-a-través-del-tiempo" class="slide level2">
 <h2>Total de estaciones por alcaldía a través del tiempo</h2>
 <p><img src="presentacion_files/figure-revealjs/unnamed-chunk-9-1.png" width="50%" style="display: block; margin: auto;" /></p>
 <ul>
-<li class="fragment">El número de estaciones en las alcadías de la zona
-centro excede vastamente el de las alcaldías más periféricas</li>
-<li class="fragment">Caso Cuauhtémoc y Benito Juárez: privilegiando a la
-zona centro.</li>
+<li class="fragment">El número de estaciones en las alcadías de la zona centro excede vastamente el de las alcaldías más periféricas</li>
+<li class="fragment">Caso Cuauhtémoc y Benito Juárez: privilegiando a la zona centro.</li>
 </ul>
 </section>
 <section id="análisis-de-correlación" class="slide level2">
@@ -968,69 +940,70 @@ zona centro.</li>
 <p><img src="presentacion_files/figure-revealjs/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /></p>
 <aside class="notes">
 <ul>
-<li><p>La correlación de distancia al Zocalo con distancia al transporte
-más cercano es positiva</p></li>
-<li><p>Correlación negativa entre distancia al zócalo con el número
-total de estaciones.</p></li>
+<li><p>La correlación de distancia al Zocalo con distancia al transporte más cercano es positiva</p></li>
+<li><p>Correlación negativa entre distancia al zócalo con el número total de estaciones.</p></li>
 <li><p>Correlaciones son aparentemente débiles, pero notables.</p></li>
 </ul>
 </aside>
 </section>
 <section id="distancia-al-transporte" class="slide level2">
 <h2>Distancia al transporte</h2>
-<p><img
-data-src="presentacion_files/figure-revealjs/mapadist.gif" /></p>
+<p><img data-src="presentacion_files/figure-revealjs/mapadist.gif" /></p>
 <ul>
-<li class="fragment">Se nota correlación espacial. Más lejos del centro
-<span class="math inline">\(\implies\)</span> menos transporte</li>
+<li class="fragment">Se nota correlación espacial. Más lejos del centro <span class="math inline">\(\implies\)</span> menos transporte</li>
 </ul>
 </section></section>
 <section>
-<section id="análisis-de-componentes-principales"
-class="title-slide slide level1">
+<section id="análisis-de-componentes-principales" class="title-slide slide level1">
 <h1>Análisis de componentes principales</h1>
+<pre><code>## Importance of components:
+##                          Comp.1    Comp.2    Comp.3    Comp.4     Comp.5
+## Standard deviation     1.434476 1.0505992 0.9382218 0.7185053 0.66483939
+## Proportion of Variance 0.411544 0.2207517 0.1760520 0.1032500 0.08840228
+## Cumulative Proportion  0.411544 0.6322957 0.8083478 0.9115977 1.00000000
+## 
+## Loadings:
+##           Comp.1 Comp.2 Comp.3 Comp.4 Comp.5
+## AÑO        0.363  0.643  0.327  0.581  0.105
+## POBLACION  0.462 -0.434 -0.400  0.496 -0.438
+## MEAN_DIST -0.536         0.450  0.239 -0.672
+## EST_TOTAL  0.547  0.195  0.231 -0.597 -0.503
+## ZOC_DIST  -0.262  0.599 -0.691        -0.303</code></pre>
+</section>
+<section class="slide level2">
 
+<p><img data-src="presentacion_files/figure-revealjs/biplot.png" /></p>
 </section>
 <section id="primera-componente" class="slide level2">
 <h2>Primera componente</h2>
 <ul>
-<li class="fragment">Las delegaciones más pobladas y con más estaciones
-tienen menor distancia promedio</li>
-<li class="fragment">La población y la cantidad de estaciones han
-aumentado con el tiempo</li>
-<li class="fragment">La distancia al zócalo está asociada con la
-cantidad de estaciones y el tamaño de la población</li>
+<li class="fragment">Las delegaciones más pobladas y con más estaciones tienen menor distancia promedio</li>
+<li class="fragment">La población y la cantidad de estaciones han aumentado con el tiempo</li>
+<li class="fragment">La distancia al zócalo está asociada con la cantidad de estaciones y el tamaño de la población</li>
 </ul>
 </section>
 <section id="segunda-componente" class="slide level2">
 <h2>Segunda componente</h2>
 <ul>
-<li class="fragment">Contrasta la población con la distancia al zócalo y
-el paso del tiempo</li>
-<li class="fragment">A mayor distancia del zócalo a través del tiempo
-menos población</li>
-<li class="fragment">Se da una idea de la concentración de la población
-en el tiempo</li>
+<li class="fragment">Contrasta la población con la distancia al zócalo y el paso del tiempo</li>
+<li class="fragment">A mayor distancia del zócalo a través del tiempo menos población</li>
+<li class="fragment">Se da una idea de la concentración de la población en el tiempo</li>
 </ul>
 </section>
 <section id="tercera-componente" class="slide level2">
 <h2>Tercera componente</h2>
 <ul>
-<li class="fragment">Comparación de la distancia al zócalo y la
-población contra la distancia promedio y la cantidad de estaciones</li>
-<li class="fragment">Nuestra hipótesis podría explicar el 20% de la
-situación</li>
+<li class="fragment">Comparación de la distancia al zócalo y la población contra la distancia promedio y la cantidad de estaciones</li>
+<li class="fragment">Nuestra hipótesis podría explicar el 20% de la situación</li>
 </ul>
 <p><img src="presentacion_files/figure-revealjs/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
 <ul>
 <li class="fragment">Ninguna componente es verdaderamente dominante</li>
-<li class="fragment">La variabilidad se explica bien hasta la cuarta
-componente con 91% de ella</li>
+<li class="fragment">La variabilidad se explica bien hasta la cuarta componente con 91% de ella</li>
 </ul>
 </section></section>
 <section>
-<section id="construcción-de-un-índice-de-conectividad"
-class="title-slide slide level1">
+<section id="construcción-de-un-índice-de-conectividad" class="title-slide slide level1">
 <h1>Construcción de un índice de conectividad</h1>
 <ul>
 <li class="fragment">Año: 2021</li>
@@ -1196,34 +1169,26 @@ Cuajimalpa
 
 <p><img src="presentacion_files/figure-revealjs/unnamed-chunk-20-1.png" width="768" style="display: block; margin: auto;" /></p>
 </section>
-<section id="análisis-del-índice-de-conectividad-por-año"
-class="slide level2">
+<section id="análisis-del-índice-de-conectividad-por-año" class="slide level2">
 <h2>Análisis del índice de conectividad por año</h2>
 <ul>
-<li class="fragment">¿Cómo ha evolucionado el índice de conectividad de
-las diversas alcaldías a medida que ha ido creciendo el sistema de
-transporte unificado?</li>
+<li class="fragment">¿Cómo ha evolucionado el índice de conectividad de las diversas alcaldías a medida que ha ido creciendo el sistema de transporte unificado?</li>
 </ul>
-<p><img data-src="presentacion_files/figure-revealjs/mapaconn.gif"
-style="height:100.0%" /></p>
+<p><img data-src="presentacion_files/figure-revealjs/mapaconn.gif" style="height:100.0%" /></p>
 <aside class="notes">
 <ul>
-<li>Nótese el brinco que dan Tlalpan, Xochimilco y Milpa Alta en los
-90s</li>
+<li>Nótese el brinco que dan Tlalpan, Xochimilco y Milpa Alta en los 90s</li>
 </ul>
 </aside>
 </section>
 <section class="slide level2">
 
-<p><img data-src="presentacion_files/figure-revealjs/connline.gif"
-style="height:100.0%" /></p>
+<p><img data-src="presentacion_files/figure-revealjs/connline.gif" style="height:100.0%" /></p>
 <aside class="notes">
 <ul>
-<li>Fíjense en el año 1991. Se abre la línea morada (calz. Zaragoza,
-Neza, etc…)</li>
+<li>Fíjense en el año 1991. Se abre la línea morada (calz. Zaragoza, Neza, etc…)</li>
 <li>Línea morada afecta dramáticamente a Tlalpan, la dorada menos</li>
-<li>Una vez que se alcanza cierto nivel de conectividad más estaciones
-no hacen la diferencia</li>
+<li>Una vez que se alcanza cierto nivel de conectividad más estaciones no hacen la diferencia</li>
 </ul>
 </aside>
 </section></section>
@@ -1232,20 +1197,15 @@ no hacen la diferencia</li>
 <h1>Regresión lineal</h1>
 <p>Ajustamos el modelo:</p>
 <p><span class="math display">\[\begin{equation}
-\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) +
-\varepsilon_i,
+\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) + \varepsilon_i,
 \end{equation}\]</span></p>
 <ul>
-<li class="fragment"><p>Tomamos el conjunto de datos de todas las
-alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y
-Cuajimalpa</p></li>
-<li class="fragment"><p>Verificamos que se cumplan los supuestos del
-modelo</p></li>
+<li class="fragment"><p>Tomamos el conjunto de datos de todas las alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y Cuajimalpa</p></li>
+<li class="fragment"><p>Verificamos que se cumplan los supuestos del modelo</p></li>
 </ul>
 <aside class="notes">
 <ul>
-<li>Se probó por homocedasticidad, no autocorrelación y
-multicolinealidad para poder hacer conclusiones</li>
+<li>Se probó por homocedasticidad, no autocorrelación y multicolinealidad para poder hacer conclusiones</li>
 </ul>
 </aside>
 </section>
@@ -1361,8 +1321,7 @@ F Statistic
 <em>Note:</em>
 </td>
 <td style="text-align:right">
-<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05;
-<sup></strong></em></sup>p&lt;0.01
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
 </td>
 </tr>
 </table>
@@ -1370,21 +1329,15 @@ F Statistic
 <section class="slide level2">
 
 <ul>
-<li class="fragment">Coeficientes asociados altamente
-significativos</li>
-<li class="fragment">El año y la población de una alcaldía se relacionan
-positivamente con el nivel de conectividad, con mayor peso en el
-año</li>
-<li class="fragment">Si se continúa desarrollando el transporte público
-a ese ritmo la conectividad a futuro mejorará notablemente</li>
-<li class="fragment">La población casi no explica el aumento en la
-oferta de transporte para alguna alcaldía</li>
+<li class="fragment">Coeficientes asociados altamente significativos</li>
+<li class="fragment">El año y la población de una alcaldía se relacionan positivamente con el nivel de conectividad, con mayor peso en el año</li>
+<li class="fragment">Si se continúa desarrollando el transporte público a ese ritmo la conectividad a futuro mejorará notablemente</li>
+<li class="fragment">La población casi no explica el aumento en la oferta de transporte para alguna alcaldía</li>
 </ul>
 </section>
 <section class="slide level2">
 
-<p>Ahora estimamos el modelo segmentado por alcaldía. Presentamos un
-ejemplo</p>
+<p>Ahora estimamos el modelo segmentado por alcaldía. Presentamos un ejemplo</p>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -1535,29 +1488,20 @@ no signif
 <section class="slide level2">
 
 <ul>
-<li class="fragment">Para GAM los coeficientes son altamente
-significativos y el coeficiente asociado a la población es mayor al de
-las demás alcaldías</li>
-<li class="fragment">Para Milpa Alta ningún coeficiente es significativo
-al 10%. Lo que ocurre en ella no influencia decisiones de constuir nuevo
-transporte.</li>
+<li class="fragment">Para GAM los coeficientes son altamente significativos y el coeficiente asociado a la población es mayor al de las demás alcaldías</li>
+<li class="fragment">Para Milpa Alta ningún coeficiente es significativo al 10%. Lo que ocurre en ella no influencia decisiones de constuir nuevo transporte.</li>
 </ul>
 </section></section>
 <section id="conclusiones" class="title-slide slide level1">
 <h1>Conclusiones</h1>
 <div>
 <ul>
-<li>Resultados de dos tipos: la visión “presente” que tenemos de la
-conectividad del transporte público y la visión “pasada” donde vemos la
-evolución de esta conectividad</li>
-<li>Respuesta a la hipótesis pensando en como fueron cambiado los
-datos</li>
-<li>Hay una mejora significativa del transporte público con el paso del
-tiempo</li>
+<li>Resultados de dos tipos: la visión “presente” que tenemos de la conectividad del transporte público y la visión “pasada” donde vemos la evolución de esta conectividad</li>
+<li>Respuesta a la hipótesis pensando en como fueron cambiado los datos</li>
+<li>Hay una mejora significativa del transporte público con el paso del tiempo</li>
 <li>Futuro de la conectividad de la ciudad</li>
 <li>¿Cuál debería ser el enfoque de una inversión?</li>
-<li>Explicación e interpretación histórica de porque cambiaron las rutas
-del transporte en lo que hoy es la CDMX</li>
+<li>Explicación e interpretación histórica de porque cambiaron las rutas del transporte en lo que hoy es la CDMX</li>
 <li>¿Qué información podría ayudar a mejorar el análisis?</li>
 </ul>
 </div>
@@ -1583,6 +1527,8 @@ del transporte en lo que hoy es la CDMX</li>
         controls: true,
         // Display a presentation progress bar
         progress: true,
+        // Display the page number of the current slide
+        slideNumber: false,
         // Push each slide change to the browser history
         history: true,
         // Enable keyboard shortcuts for navigation
@@ -1593,8 +1539,15 @@ del transporte en lo que hoy es la CDMX</li>
         center: false,
         // Enables touch navigation on devices with touch input
         touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
         // Turns fragments on and off globally
         fragments: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
         // Flags if we should show a help overlay when the questionmark
         // key is pressed
         help: true,
@@ -1604,6 +1557,10 @@ del transporte en lo que hoy es la CDMX</li>
         autoSlide: 0,
         // Stop auto-sliding after user input
         autoSlideStoppable: true,
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
         // Transition style
         transition: 'default', // none/fade/slide/convex/concave/zoom
         // Transition speed

@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Alonso Martinez Cisneros" />
+  <meta name="author" content="Juan Carlos Sigler Priego" />
+  <meta name="author" content="Carlos Delgado" />
+  <meta name="author" content="Esmeralda Altamirano" />
+  <title>Explorando la distribución del transporte público en la cdmx</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="presentacion_files/reveal.js-3.3.0.1/css/reveal.css"/>
+
+
+
+<link rel="stylesheet" href="presentacion_files/reveal.js-3.3.0.1/css/theme/solarized.css" id="theme">
+
+
+  <!-- some tweaks to reveal css -->
+  <style type="text/css">
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+
+
+
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+
+  </style>
+
+    <style type="text/css">code{white-space: pre;}</style>
+
+
+<!-- Printing and PDF exports -->
+<script id="paper-css" type="application/dynamic-css">
+
+/* Default Print Stylesheet Template
+   by Rob Glazebrook of CSSnewbie.com
+   Last Updated: June 4, 2008
+
+   Feel free (nay, compelled) to edit, append, and
+   manipulate this file as you see fit. */
+
+
+@media print {
+
+	/* SECTION 1: Set default width, margin, float, and
+	   background. This prevents elements from extending
+	   beyond the edge of the printed page, and prevents
+	   unnecessary background images from printing */
+	html {
+		background: #fff;
+		width: auto;
+		height: auto;
+		overflow: visible;
+	}
+	body {
+		background: #fff;
+		font-size: 20pt;
+		width: auto;
+		height: auto;
+		border: 0;
+		margin: 0 5%;
+		padding: 0;
+		overflow: visible;
+		float: none !important;
+	}
+
+	/* SECTION 2: Remove any elements not needed in print.
+	   This would include navigation, ads, sidebars, etc. */
+	.nestedarrow,
+	.controls,
+	.fork-reveal,
+	.share-reveal,
+	.state-background,
+	.reveal .progress,
+	.reveal .backgrounds {
+		display: none !important;
+	}
+
+	/* SECTION 3: Set body font face, size, and color.
+	   Consider using a serif font for readability. */
+	body, p, td, li, div {
+		font-size: 20pt!important;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		color: #000;
+	}
+
+	/* SECTION 4: Set heading font face, sizes, and color.
+	   Differentiate your headings from your body text.
+	   Perhaps use a large sans-serif for distinction. */
+	h1,h2,h3,h4,h5,h6 {
+		color: #000!important;
+		height: auto;
+		line-height: normal;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		text-shadow: 0 0 0 #000 !important;
+		text-align: left;
+		letter-spacing: normal;
+	}
+	/* Need to reduce the size of the fonts for printing */
+	h1 { font-size: 28pt !important;  }
+	h2 { font-size: 24pt !important; }
+	h3 { font-size: 22pt !important; }
+	h4 { font-size: 22pt !important; font-variant: small-caps; }
+	h5 { font-size: 21pt !important; }
+	h6 { font-size: 20pt !important; font-style: italic; }
+
+	/* SECTION 5: Make hyperlinks more usable.
+	   Ensure links are underlined, and consider appending
+	   the URL to the end of the link for usability. */
+	a:link,
+	a:visited {
+		color: #000 !important;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+	/*
+	.reveal a:link:after,
+	.reveal a:visited:after {
+		content: " (" attr(href) ") ";
+		color: #222 !important;
+		font-size: 90%;
+	}
+	*/
+
+
+	/* SECTION 6: more reveal.js specific additions by @skypanther */
+	ul, ol, div, p {
+		visibility: visible;
+		position: static;
+		width: auto;
+		height: auto;
+		display: block;
+		overflow: visible;
+		margin: 0;
+		text-align: left !important;
+	}
+	.reveal pre,
+	.reveal table {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	.reveal pre code {
+		padding: 20px;
+		border: 1px solid #ddd;
+	}
+	.reveal blockquote {
+		margin: 20px 0;
+	}
+	.reveal .slides {
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 0 !important;
+		zoom: 1 !important;
+
+		overflow: visible !important;
+		display: block !important;
+
+		text-align: left !important;
+		-webkit-perspective: none;
+		   -moz-perspective: none;
+		    -ms-perspective: none;
+		        perspective: none;
+
+		-webkit-perspective-origin: 50% 50%;
+		   -moz-perspective-origin: 50% 50%;
+		    -ms-perspective-origin: 50% 50%;
+		        perspective-origin: 50% 50%;
+	}
+	.reveal .slides section {
+		visibility: visible !important;
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+		display: block !important;
+		overflow: visible !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 60px 20px !important;
+		z-index: auto !important;
+
+		opacity: 1 !important;
+
+		page-break-after: always !important;
+
+		-webkit-transform-style: flat !important;
+		   -moz-transform-style: flat !important;
+		    -ms-transform-style: flat !important;
+		        transform-style: flat !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		        transition: none !important;
+	}
+	.reveal .slides section.stack {
+		padding: 0 !important;
+	}
+	.reveal section:last-of-type {
+		page-break-after: avoid !important;
+	}
+	.reveal section .fragment {
+		opacity: 1 !important;
+		visibility: visible !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+	}
+	.reveal section img {
+		display: block;
+		margin: 15px 0px;
+		background: rgba(255,255,255,1);
+		border: 1px solid #666;
+		box-shadow: none;
+	}
+
+	.reveal section small {
+		font-size: 0.8em;
+	}
+
+}  
+</script>
+
+
+<script id="pdf-css" type="application/dynamic-css">
+    
+/**
+ * This stylesheet is used to print reveal.js
+ * presentations to PDF.
+ *
+ * https://github.com/hakimel/reveal.js#pdf-export
+ */
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+
+body {
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	float: none !important;
+	overflow: visible;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Remove any elements not needed in print. */
+.nestedarrow,
+.reveal .controls,
+.reveal .progress,
+.reveal .playback,
+.reveal.overview,
+.fork-reveal,
+.share-reveal,
+.state-background {
+	display: none !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow: 0 0 0 #000 !important;
+}
+
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
+}
+
+ul, ol, div, p {
+	visibility: visible;
+	position: static;
+	width: auto;
+	height: auto;
+	display: block;
+	overflow: visible;
+	margin: auto;
+}
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: hidden !important;
+}
+.reveal .slides {
+	position: static;
+	width: 100%;
+	height: auto;
+
+	left: auto;
+	top: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+
+	overflow: visible;
+	display: block;
+
+	-webkit-perspective: none;
+	   -moz-perspective: none;
+	    -ms-perspective: none;
+	        perspective: none;
+
+	-webkit-perspective-origin: 50% 50%; /* there isn't a none/auto value but 50-50 is the default */
+	   -moz-perspective-origin: 50% 50%;
+	    -ms-perspective-origin: 50% 50%;
+	        perspective-origin: 50% 50%;
+}
+
+.reveal .slides section {
+	page-break-after: always !important;
+
+	visibility: visible !important;
+	position: relative !important;
+	display: block !important;
+	position: relative !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
+
+	opacity: 1 !important;
+
+	-webkit-transform-style: flat !important;
+	   -moz-transform-style: flat !important;
+	    -ms-transform-style: flat !important;
+	        transform-style: flat !important;
+
+	-webkit-transform: none !important;
+	   -moz-transform: none !important;
+	    -ms-transform: none !important;
+	        transform: none !important;
+}
+
+.reveal section.stack {
+	margin: 0 !important;
+	padding: 0 !important;
+	page-break-after: avoid !important;
+	height: auto !important;
+	min-height: auto !important;
+}
+
+.reveal img {
+	box-shadow: none;
+}
+
+.reveal .roll {
+	overflow: visible;
+	line-height: 1em;
+}
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: -1;
+}
+
+/* All elements should be above the slide-background */
+.reveal section>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* Display slide speaker notes when 'showNotes' is enabled */
+.reveal .speaker-notes-pdf {
+	display: block;
+	width: 100%;
+	max-height: none;
+	left: auto;
+	top: auto;
+	z-index: 100;
+}
+
+/* Display slide numbers when 'slideNumber' is enabled */
+.reveal .slide-number-pdf {
+	display: block;
+	position: absolute;
+	font-size: 14px;
+}
+
+</script>
+
+
+<script>
+var style = document.createElement( 'style' );
+style.type = 'text/css';
+var style_script_id = window.location.search.match( /print-pdf/gi ) ? 'pdf-css' : 'paper-css';
+var style_script = document.getElementById(style_script_id).text;
+style.innerHTML = style_script;
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>
+
+    <script src="presentacion_files/header-attrs-2.14/header-attrs.js"></script>
+    <link href="presentacion_files/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+    <link href="presentacion_files/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+    <script src="presentacion_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="presentacion_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Explorando la distribución del transporte público
+en la <span class="smallcaps">cdmx</span></h1>
+    <h2 class="author">Alonso Martinez Cisneros</h2>
+    <h2 class="author">Juan Carlos Sigler Priego</h2>
+    <h2 class="author">Carlos Delgado</h2>
+    <h2 class="author">Esmeralda Altamirano</h2>
+    <h3 class="date">Primavera 2022</h3>
+</section>
+
+<section id="propuesta-del-proyecto" class="title-slide slide level1">
+<h1>Propuesta del Proyecto</h1>
+<ul>
+<li class="fragment">Pregunta clave: ¿Está bien distribuido el sistema
+de transporte público para servir a las necesidades de la población de
+la ciudad?</li>
+<li class="fragment">Buscamos tener una visión histórica de cómo ha ido
+evolucionando la cobertura del transporte público</li>
+<li class="fragment">Análisis exploratorio</li>
+<li class="fragment">Análisis de correlación de variables</li>
+<li class="fragment">Construcción de índice de conectividad usando
+análisis factorial</li>
+<li class="fragment">Modelo de regresión lineal</li>
+</ul>
+</section>
+
+<section>
+<section id="planteamiento-del-problema"
+class="title-slide slide level1">
+<h1>Planteamiento del problema</h1>
+<ul>
+<li class="fragment">Transporte público en la Ciudad de México.</li>
+<li class="fragment">9,275,467 habitantes</li>
+<li class="fragment">¿Bien planeado y accesible?</li>
+</ul>
+</section>
+<section id="objetivos" class="slide level2">
+<h2>Objetivos</h2>
+<ul>
+<li class="fragment">Cuantificar el nivel de acceso de la población de
+distintas alcaldías a los diversios medios de transporte público:
+<ul>
+<li class="fragment">Metro</li>
+<li class="fragment">Metrobus</li>
+<li class="fragment">Tren Ligero</li>
+<li class="fragment">Cablebus</li>
+</ul></li>
+<li class="fragment">Determinar que tan bien distribuido está el
+transporte público en la ciudad</li>
+</ul>
+</section>
+<section id="hipótesis" class="slide level2">
+<h2>Hipótesis</h2>
+<ul>
+<li class="fragment">El transporte público está muy centralizado en la
+zona del centro histórico.
+<ul>
+<li class="fragment">Benito Juárez, Cuauhtémoc son zonas
+privilegiadas.</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
+<section id="análisis-exploratorio" class="title-slide slide level1">
+<h1>Análisis exploratorio</h1>
+<ul>
+<li class="fragment">Hay 16 alcaldías.</li>
+<li class="fragment">Años: 1969-2021</li>
+</ul>
+<div class="fragment">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+AÑO
+</th>
+<th style="text-align:left;">
+ALCALDIA
+</th>
+<th style="text-align:right;">
+POBLACION
+</th>
+<th style="text-align:right;">
+MEAN_DIST
+</th>
+<th style="text-align:right;">
+EST_TOTAL
+</th>
+<th style="text-align:right;">
+ZOC_DIST
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+1969
+</td>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+527857
+</td>
+<td style="text-align:right;">
+2019.077
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2028.311
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1970
+</td>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+534554
+</td>
+<td style="text-align:right;">
+1050.163
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2028.311
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1971
+</td>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+541251
+</td>
+<td style="text-align:right;">
+1050.163
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2028.311
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1972
+</td>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+547948
+</td>
+<td style="text-align:right;">
+958.866
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2028.311
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1973
+</td>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+554645
+</td>
+<td style="text-align:right;">
+958.866
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2028.311
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1974
+</td>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+561342
+</td>
+<td style="text-align:right;">
+958.866
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2028.311
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section class="slide level2">
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+AÑO
+</th>
+<th style="text-align:left;">
+ALCALDIA
+</th>
+<th style="text-align:left;">
+POBLACION
+</th>
+<th style="text-align:left;">
+MEAN_DIST
+</th>
+<th style="text-align:left;">
+EST_TOTAL
+</th>
+<th style="text-align:left;">
+ZOC_DIST
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Min. :1969
+</td>
+<td style="text-align:left;">
+Length:848
+</td>
+<td style="text-align:left;">
+Min. : 30700
+</td>
+<td style="text-align:left;">
+Min. : 140.8
+</td>
+<td style="text-align:left;">
+Min. : 0.00
+</td>
+<td style="text-align:left;">
+Min. : 2028
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+1st Qu.:1982
+</td>
+<td style="text-align:left;">
+Class :character
+</td>
+<td style="text-align:left;">
+1st Qu.: 257079
+</td>
+<td style="text-align:left;">
+1st Qu.: 382.5
+</td>
+<td style="text-align:left;">
+1st Qu.: 0.00
+</td>
+<td style="text-align:left;">
+1st Qu.: 3641
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Median :1995
+</td>
+<td style="text-align:left;">
+Mode :character
+</td>
+<td style="text-align:left;">
+Median : 443768
+</td>
+<td style="text-align:left;">
+Median : 942.3
+</td>
+<td style="text-align:left;">
+Median : 5.00
+</td>
+<td style="text-align:left;">
+Median : 5831
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Mean :1995
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Mean : 532742
+</td>
+<td style="text-align:left;">
+Mean : 2252.4
+</td>
+<td style="text-align:left;">
+Mean : 10.94
+</td>
+<td style="text-align:left;">
+Mean : 7366
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+3rd Qu.:2008
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+3rd Qu.: 639251
+</td>
+<td style="text-align:left;">
+3rd Qu.: 3051.8
+</td>
+<td style="text-align:left;">
+3rd Qu.: 15.00
+</td>
+<td style="text-align:left;">
+3rd Qu.:12048
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Max. :2021
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Max. :1840000
+</td>
+<td style="text-align:left;">
+Max. :12926.4
+</td>
+<td style="text-align:left;">
+Max. :118.00
+</td>
+<td style="text-align:left;">
+Max. :17697
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+NA’s :53
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+NA’s :53
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="descripción-de-las-variables-de-interés"
+class="slide level2">
+<h2>Descripción de las variables de interés</h2>
+<ul>
+<li class="fragment"><code>AÑO</code></li>
+<li class="fragment"><code>ALCALDIA</code></li>
+<li class="fragment"><code>POBLACIÓN</code></li>
+<li class="fragment"><code>MEAN_DIST</code></li>
+<li class="fragment"><code>EST_TOTAL</code></li>
+<li class="fragment"><code>ZOC_DIST</code></li>
+</ul>
+</section>
+<section id="construcción-de-la-base-de-datos" class="slide level2">
+<h2>Construcción de la base de datos</h2>
+<h3 id="número-total-de-estaciones-por-alcaldía">Número total de
+estaciones por alcaldía</h3>
+<p><img src="presentacion_files/figure-revealjs/mapa-lineas-1.png" width="768" style="display: block; margin: auto;" /></p>
+</section>
+<section class="slide level2">
+
+<p><img src="presentacion_files/figure-revealjs/mapa-alc-1.png" width="768" style="display: block; margin: auto;" /></p>
+</section>
+<section class="slide level2">
+
+<ul>
+<li class="fragment"><p>A simple vista se podría sospechar que el
+transporte público está concentrado al centro y norte del
+territorio.<br />
+</p></li>
+<li class="fragment"><p>Centro: Miguel Hidalgo, Cuauhtémoc, Benito
+Juárez</p></li>
+<li class="fragment"><p>Las carencias más grandes se pueden ver en las
+alcaldías de Tlalpan, Magdalena Contreras, Xochimilco y Milpa
+Alta.</p></li>
+<li class="fragment"><p>Será porque son de las menos pobladas??</p></li>
+</ul>
+<!-- ### Distancia promedio al transporte público
+
+- `MEAN_DIST` - Cómo es que el transporte está distribuido con respecto a la
+_población_ y dónde vive ésta.  - Ideas insuficientes - Cantidad de estaciones
+en total contenidas dentro de los límites de una alcaldía - Número total de
+estaciones normalizado por área las alcaldías - Conectividad: distancia promedio
+por alcaldía de las zonas residenciales al transporte más cercano.  - Uso de
+suelo de la CDMX publicado por la Secretaría de Desarrollo Urbano y Vivienda.  -
+Falta Álvaro Obregón, una de las más pobladas
+
+---
+
+### Número total de estaciones & distancia a la zona centro
+
+- Total de estaciones dentro de la alcaldía por año para tomar en cuenta cómo ha
+evolucionado el sistema de transporte unificado.  - La distancia a la zona
+centro se toma como la distancia promedio de las mismas zonas residenciales al
+zócalo de la ciudad.  - Zócalo como punto central puesto que es una de las zonas
+más antiguas y por lo tanto el crecimiento de la zona metropolitana de la ciudad
+ha sido radialmente hacia afuera de esta zona.  - Las primeras estaciones de
+metro y metrobus fueron construidas precisamente para servir a la zona centro.
+
+--- -->
+</section>
+<section id="acceso-a-transporte-con-base-en-la-población"
+class="slide level2">
+<h2>Acceso a transporte con base en la población</h2>
+<p><img data-src="presentacion_files/figure-revealjs/mapapob.gif" /></p>
+</section>
+<section class="slide level2">
+
+<p><img data-src="presentacion_files/figure-revealjs/mapaest.gif" /></p>
+<ul>
+<li class="fragment">Concentración alta de transporte en la zona
+centro</li>
+<li class="fragment">Sin embargo, las alcaldías del centro
+<strong>no</strong> son las más pobladas</li>
+</ul>
+</section>
+<section id="evolución-de-la-conectividad-como-función-del-tiempo"
+class="slide level2">
+<h2>Evolución de la conectividad como función del tiempo</h2>
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;" /></p>
+</section>
+<section class="slide level2">
+
+<ul>
+<li class="fragment">Zona centro siempre ha estado bien conectada.
+<ul>
+<li class="fragment">Cuauhtémoc, Benito Juárez y Venustiano Carranza
+tienen las menores varianzas en distancia media y además las más
+pequeñas.</li>
+</ul></li>
+<li class="fragment">Tláhuac, Cuajimalpa y Milpa Alta son los de mayor
+distancia y variación.</li>
+<li class="fragment">Sesgo a la izquierda: el sistema evolucionó
+rápidamente para cubrir gran parte de la zona metropolitana.</li>
+</ul>
+</section>
+<section id="total-de-estaciones-por-alcaldía-a-través-del-tiempo"
+class="slide level2">
+<h2>Total de estaciones por alcaldía a través del tiempo</h2>
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-9-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<ul>
+<li class="fragment">El número de estaciones en las alcadías de la zona
+centro excede vastamente el de las alcaldías más periféricas</li>
+<li class="fragment">Caso Cuauhtémoc y Benito Juárez: privilegiando a la
+zona centro.</li>
+</ul>
+</section>
+<section id="análisis-de-correlación" class="slide level2">
+<h2>Análisis de Correlación</h2>
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /></p>
+<aside class="notes">
+<ul>
+<li><p>La correlación de distancia al Zocalo con distancia al transporte
+más cercano es positiva</p></li>
+<li><p>Correlación negativa entre distancia al zócalo con el número
+total de estaciones.</p></li>
+<li><p>Correlaciones son aparentemente débiles, pero notables.</p></li>
+</ul>
+</aside>
+</section>
+<section id="distancia-al-transporte" class="slide level2">
+<h2>Distancia al transporte</h2>
+<p><img
+data-src="presentacion_files/figure-revealjs/mapadist.gif" /></p>
+<ul>
+<li class="fragment">Se nota correlación espacial. Más lejos del centro
+<span class="math inline">\(\implies\)</span> menos transporte</li>
+</ul>
+</section></section>
+<section>
+<section id="análisis-de-componentes-principales"
+class="title-slide slide level1">
+<h1>Análisis de componentes principales</h1>
+
+</section>
+<section id="primera-componente" class="slide level2">
+<h2>Primera componente</h2>
+<ul>
+<li class="fragment">Las delegaciones más pobladas y con más estaciones
+tienen menor distancia promedio</li>
+<li class="fragment">La población y la cantidad de estaciones han
+aumentado con el tiempo</li>
+<li class="fragment">La distancia al zócalo está asociada con la
+cantidad de estaciones y el tamaño de la población</li>
+</ul>
+</section>
+<section id="segunda-componente" class="slide level2">
+<h2>Segunda componente</h2>
+<ul>
+<li class="fragment">Contrasta la población con la distancia al zócalo y
+el paso del tiempo</li>
+<li class="fragment">A mayor distancia del zócalo a través del tiempo
+menos población</li>
+<li class="fragment">Se da una idea de la concentración de la población
+en el tiempo</li>
+</ul>
+</section>
+<section id="tercera-componente" class="slide level2">
+<h2>Tercera componente</h2>
+<ul>
+<li class="fragment">Comparación de la distancia al zócalo y la
+población contra la distancia promedio y la cantidad de estaciones</li>
+<li class="fragment">Nuestra hipótesis podría explicar el 20% de la
+situación</li>
+</ul>
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
+<ul>
+<li class="fragment">Ninguna componente es verdaderamente dominante</li>
+<li class="fragment">La variabilidad se explica bien hasta la cuarta
+componente con 91% de ella</li>
+</ul>
+</section></section>
+<section>
+<section id="construcción-de-un-índice-de-conectividad"
+class="title-slide slide level1">
+<h1>Construcción de un índice de conectividad</h1>
+<ul>
+<li class="fragment">Año: 2021</li>
+<li class="fragment">Análisis factorial
+<ul>
+<li class="fragment">Distancia promedio a las estaciones</li>
+<li class="fragment">Cantidad de estaciones en la alcaldía</li>
+</ul></li>
+</ul>
+</section>
+<section id="gráfico-de-sedimentación-scree-plot" class="slide level2">
+<h2>Gráfico de sedimentación (scree plot)</h2>
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-15-1.png" width="75%" style="display: block; margin: auto;" /></p>
+<ul>
+<li class="fragment">Un factor es suficiente</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-16-1.png" width="768" style="display: block; margin: auto;" /></p>
+</section>
+<section id="índice-de-conectividad-2021" class="slide level2">
+<h2>Índice de conectividad 2021</h2>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+ML1
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Cuauhtémoc
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Gustavo A. Madero
+</td>
+<td style="text-align:right;">
+0.891
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Venustiano Carranza
+</td>
+<td style="text-align:right;">
+0.725
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Iztapalapa
+</td>
+<td style="text-align:right;">
+0.704
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Benito Juárez
+</td>
+<td style="text-align:right;">
+0.699
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Iztacalco
+</td>
+<td style="text-align:right;">
+0.621
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Azcapotzalco
+</td>
+<td style="text-align:right;">
+0.609
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Miguel Hidalgo
+</td>
+<td style="text-align:right;">
+0.597
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Coyoacán
+</td>
+<td style="text-align:right;">
+0.564
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tláhuac
+</td>
+<td style="text-align:right;">
+0.499
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Xochimilco
+</td>
+<td style="text-align:right;">
+0.491
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tlalpan
+</td>
+<td style="text-align:right;">
+0.462
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Milpa Alta
+</td>
+<td style="text-align:right;">
+0.407
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Magdalena Contreras
+</td>
+<td style="text-align:right;">
+0.247
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cuajimalpa
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level2">
+
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-19-1.png" width="768" style="display: block; margin: auto;" /></p>
+</section>
+<section class="slide level2">
+
+<p><img src="presentacion_files/figure-revealjs/unnamed-chunk-20-1.png" width="768" style="display: block; margin: auto;" /></p>
+</section>
+<section id="análisis-del-índice-de-conectividad-por-año"
+class="slide level2">
+<h2>Análisis del índice de conectividad por año</h2>
+<ul>
+<li class="fragment">¿Cómo ha evolucionado el índice de conectividad de
+las diversas alcaldías a medida que ha ido creciendo el sistema de
+transporte unificado?</li>
+</ul>
+<p><img data-src="presentacion_files/figure-revealjs/mapaconn.gif"
+style="height:100.0%" /></p>
+</section>
+<section class="slide level2">
+
+<p><img data-src="presentacion_files/figure-revealjs/connline.gif"
+style="height:100.0%" /></p>
+</section></section>
+<section>
+<section id="regresión-lineal" class="title-slide slide level1">
+<h1>Regresión lineal</h1>
+<p>Ajustamos el modelo:</p>
+<p><span class="math display">\[\begin{equation}
+\text{score}_i = \log(\text{AÑO}_i) + \log(\text{POBLACION}_i) +
+\varepsilon_i,
+\end{equation}\]</span></p>
+<ul>
+<li class="fragment"><p>Tomamos el conjunto de datos de todas las
+alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y
+Cuajimalpa</p></li>
+<li class="fragment"><p>Verificamos que se cumplan los supuestos del
+modelo</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Los coeficientes estimados son:</p>
+<table style="text-align:center">
+<caption>
+<strong>Estimación de parámetros para modelo lineal descrito.</strong>
+</caption>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+log(score)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+log(AÑO)
+</td>
+<td>
+3.617<sup>***</sup> (0.484)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+log(POBLACION)
+</td>
+<td>
+0.098<sup>***</sup> (0.005)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-27.672<sup>***</sup> (3.674)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+689
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.446
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.445
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error
+</td>
+<td>
+0.096 (df = 686)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic
+</td>
+<td>
+276.483<sup>***</sup> (df = 2; 686)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05;
+<sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</section>
+<section class="slide level2">
+
+<ul>
+<li class="fragment">Coeficientes asociados altamente
+significativos</li>
+<li class="fragment">El año y la población de una alcaldía se relacionan
+positivamente con el nivel de conectividad, con mayor peso en el
+año</li>
+<li class="fragment">Si se continúa desarrollando el transporte público
+a ese ritmo la conectividad a futuro mejorará notablemente</li>
+<li class="fragment">La población casi no explica el aumento en la
+oferta de transporte para alguna alcaldía</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Ahora estimamos el modelo segmentado por alcaldía. Presentamos un
+ejemplo</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+ALCALDIA
+</th>
+<th style="text-align:left;">
+term
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+is.signif
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Gustavo A. Madero
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-88.973
+</td>
+<td style="text-align:right;">
+13.503
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+signif
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Gustavo A. Madero
+</td>
+<td style="text-align:left;">
+log(AÑO)
+</td>
+<td style="text-align:right;">
+11.378
+</td>
+<td style="text-align:right;">
+1.668
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:left;">
+signif
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Gustavo A. Madero
+</td>
+<td style="text-align:left;">
+log(POBLACION)
+</td>
+<td style="text-align:right;">
+0.426
+</td>
+<td style="text-align:right;">
+0.166
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:left;">
+signif
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Milpa Alta
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-49.473
+</td>
+<td style="text-align:right;">
+50.868
+</td>
+<td style="text-align:right;">
+0.335
+</td>
+<td style="text-align:left;">
+no signif
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Milpa Alta
+</td>
+<td style="text-align:left;">
+log(AÑO)
+</td>
+<td style="text-align:right;">
+6.515
+</td>
+<td style="text-align:right;">
+6.759
+</td>
+<td style="text-align:right;">
+0.340
+</td>
+<td style="text-align:left;">
+no signif
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Milpa Alta
+</td>
+<td style="text-align:left;">
+log(POBLACION)
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+0.112
+</td>
+<td style="text-align:right;">
+0.663
+</td>
+<td style="text-align:left;">
+no signif
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level2">
+
+<ul>
+<li class="fragment">Para GAM los coeficientes son altamente
+significativos y el coeficiente asociado a la población es mayor al de
+las demás alcaldías</li>
+<li class="fragment">Para Milpa Alta ningún coeficiente es significativo
+al 10%. Lo que ocurre en ella no influencia decisiones de constuir nuevo
+transporte.</li>
+</ul>
+</section></section>
+<section id="conclusiones" class="title-slide slide level1">
+<h1>Conclusiones</h1>
+<div>
+<ul>
+<li>Resultados de dos tipos: la visión “presente” que tenemos de la
+conectividad del transporte público y la visión “pasada” donde vemos la
+evolución de esta conectividad</li>
+<li>Respuesta a la hipótesis pensando en como fueron cambiado los
+datos</li>
+<li>Hay una mejora significativa del transporte público con el paso del
+tiempo</li>
+<li>Futuro de la conectividad de la ciudad</li>
+<li>¿Cuál debería ser el enfoque de una inversión?</li>
+<li>Explicación e interpretación histórica de porque cambiaron las rutas
+del transporte en lo que hoy es la CDMX</li>
+<li>¿Qué información podría ayudar a mejorar el análisis?</li>
+</ul>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="presentacion_files/reveal.js-3.3.0.1/lib/js/head.min.js"></script>
+  <script src="presentacion_files/reveal.js-3.3.0.1/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: false,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+        // Transition style
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'default', // none/fade/slide/convex/concave/zoom
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        menu: {
+   
+    
+    
+    
+    
+    
+    
+ 
+          custom: false,
+          themes: false,
+          transitions: false
+        },
+
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'presentacion_files/reveal.js-3.3.0.1/plugin/notes/notes.js', async: true },
+          { src: 'presentacion_files/reveal.js-3.3.0.1/plugin/zoom-js/zoom.js', async: true },
+          { src: 'presentacion_files/reveal.js-3.3.0.1/plugin/menu/menu.js', async: true },
+        ]
+      });
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>

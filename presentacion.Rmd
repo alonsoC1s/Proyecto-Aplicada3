@@ -166,8 +166,6 @@ Contreras, Xochimilco y Milpa Alta.
 
 - Será porque son de las menos pobladas??
 
----
-
 <!-- ### Distancia promedio al transporte público
 
 - `MEAN_DIST` - Cómo es que el transporte está distribuido con respecto a la
@@ -194,7 +192,9 @@ metro y metrobus fueron construidas precisamente para servir a la zona centro.
 
 ## Acceso a transporte con base en la población
 
-```{R, echo = FALSE}
+![](presentacion_files/figure-revealjs/mapapob.gif)
+
+```{R, include = FALSE}
 info |>
   dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
@@ -212,13 +212,9 @@ info |>
     )
 ```
 
-- Concentración alta de transporte en la zona centro. 
-- Sin embargo, las alcaldías del centro **no** son las más pobladas.
-
-
 ---
 
-```{R, echo = FALSE}
+```{R, include = FALSE}
 info |>
   dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
@@ -236,9 +232,14 @@ info |>
     )
 ```
 
+![](presentacion_files/figure-revealjs/mapaest.gif)
+
+- Concentración alta de transporte en la zona centro
+- Sin embargo, las alcaldías del centro **no** son las más pobladas
+
 ---
 
-### Evolución de la conectividad como función del tiempo
+## Evolución de la conectividad como función del tiempo
 
 ```{R, echo=FALSE}
 ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
@@ -260,7 +261,7 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=MEAN_DIST)) +
 
 ---
 
-### Total de estaciones por alcaldía a través del tiempo
+## Total de estaciones por alcaldía a través del tiempo
 
 ```{R, echo=FALSE, out.width = "50%"}
 ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
@@ -278,7 +279,7 @@ ggplot(data = info, mapping=aes(x=ALCALDIA, y=EST_TOTAL)) +
 
 ---
 
-### Análisis de Correlación
+## Análisis de Correlación
 
 ```{R, echo=FALSE}
 info |>
@@ -299,7 +300,9 @@ info |>
 
 ----
 
-```{R, echo = FALSE}
+## Distancia al transporte
+
+```{R, include = FALSE}
 info |>
   dplyr::filter(AÑO == 2021) |>
   group_by(ALCALDIA) |>
@@ -318,6 +321,8 @@ info |>
       na.value = "gray"
     )
 ```
+
+![](presentacion_files/figure-revealjs/mapadist.gif)
 
 - Se nota correlación espacial. Más lejos del centro $\implies$ menos transporte
 
@@ -467,7 +472,7 @@ indexiza <- function(df){
 }
 ```
 
-```{R, echo=F}
+```{R, include=F}
 con_by_year <- info |>
   group_by(AÑO) |>
   #dplyr::select(EST_TOTAL, MEAN_DIST, AÑO, ALCALDIA) |>
@@ -477,13 +482,17 @@ ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
   geom_line()
 ```
 
+![](presentacion_files/figure-revealjs/mapaconn.gif){height="100%"}
+
 ---
 
-```{R, echo=F}
+```{R, include=F}
 ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
   geom_boxplot(fill = "#56B1F7") + 
   coord_flip()
 ```
+
+![](presentacion_files/figure-revealjs/connline.gif){height="100%"}
 
 # Regresión lineal
 

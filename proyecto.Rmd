@@ -685,6 +685,9 @@ ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
     x = "Año",
     y = "score de conectividad"
   )
+
+
+# write.csv(con_by_year, "data/con_by_year.csv")
 ```
 
 

@@ -11,6 +11,7 @@ output:
     theme: solarized
     self_contained: false
     reveal_plugins: ["notes", "zoom", "menu"]
+output_file: "index.html"
 date: 'Primavera 2022'
 bibliography: refs.bib
 lang: "es"
@@ -43,7 +44,7 @@ kableFormat <- function(df, ls='', ...) {
 # Propuesta del Proyecto
 
 
-- Pregunta clave: ¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?
+- Pregunta clave: _¿Está bien distribuido el sistema de transporte público para servir a las necesidades de la población de la ciudad?_
 - Buscamos tener una visión histórica de cómo ha ido evolucionando la cobertura del transporte público
 - Análisis exploratorio
 - Análisis de correlación de variables
@@ -97,6 +98,10 @@ summary(info) |> kableFormat()
 - `MEAN_DIST`
 - `EST_TOTAL`
 - `ZOC_DIST`
+
+::: notes
+- Se construyeron con información de muchos conjuntos de datos
+:::
 
 
 ## Construcción de la base de datos
@@ -484,6 +489,10 @@ ggplot(con_by_year, mapping=aes(x=AÑO, y=score, color=ALCALDIA)) +
 
 ![](presentacion_files/figure-revealjs/mapaconn.gif){height="100%"}
 
+::: notes
+- Nótese el brinco que dan Tlalpan, Xochimilco y Milpa Alta en los 90s
+:::
+
 ---
 
 ```{R, include=F}
@@ -493,6 +502,12 @@ ggplot(con_by_year, mapping=aes(y=score, x=ALCALDIA)) +
 ```
 
 ![](presentacion_files/figure-revealjs/connline.gif){height="100%"}
+
+::: notes
+- Fíjense en el año 1991. Se abre la línea morada (calz. Zaragoza, Neza, etc...)
+- Línea morada afecta dramáticamente a Tlalpan, la dorada menos
+- Una vez que se alcanza cierto nivel de conectividad más estaciones no hacen la diferencia
+:::
 
 # Regresión lineal
 
@@ -506,6 +521,10 @@ Ajustamos el modelo:
 - Tomamos el conjunto de datos de todas las alcaldías disponibles excepto Álvaro Obregón, Cuauhtémoc y Cuajimalpa
 
 - Verificamos que se cumplan los supuestos del modelo
+
+::: notes
+- Se probó por homocedasticidad, no autocorrelación y multicolinealidad para poder hacer conclusiones
+:::
 
 ----
 
@@ -577,4 +596,9 @@ coefs |> dplyr::filter(ALCALDIA %in% c("Milpa Alta", "Gustavo A. Madero")) |>
 - Explicación e interpretación histórica de porque cambiaron las rutas del transporte en lo que hoy es la CDMX
 - ¿Qué información podría ayudar a mejorar el análisis? 
 
+:::
+
+::: notes
+- La apertura de la línea dorada no parece ser un punto pivotal
+- La apertura de la línea morada paracer ser punto pivotal
 :::
